@@ -1,7 +1,40 @@
 import numpy as np
-
+# ========================
 def compute_mse(y, tx, w):
+    """Calculate the loss using MSE
+
+    Args:
+        y: numpy array of shape=(N, )
+        tx: numpy array of shape=(N,2)
+        w: numpy array of shape=(2,). The vector of model parameters.
+
+    Returns:
+        float: MSE across e
+    """
     return 1/(2*len(y)) * ((y - tx.dot(w)) ** 2).sum()
+#WHICH ONE DO WE KEEP???
+def compute_mse(e): 
+    """Calculate the loss using MAE.
+
+    Args:
+        e: numpy array of shape=(N, )
+        
+    Returns:
+        float: MAE across e
+    """
+    return 1/2*np.mean(e**2)
+# ========================
+
+def compute_mae(e):
+    """Calculate the loss using MAE.
+
+    Args:
+        e: numpy array of shape=(N, )
+        
+    Returns:
+        float: MAE across e
+    """
+    return np.mean(np.abs(e))
 
 def compute_gradient(y, tx, w):
     return - 1/len(y) * tx.T.dot(y - tx.dot(w))
