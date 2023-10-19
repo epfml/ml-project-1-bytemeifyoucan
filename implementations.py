@@ -101,7 +101,8 @@ def ridge_regression(y, tx, lambda_, cost = 'mse'):
     """
     N = y.size
     D = tx.shape[1]
-    w = np.linalg.solve(np.dot(tx.T, tx) + 2*N*lambda_ * np.identity(D) , np.dot(tx.T, y))
+    txT = tx.T
+    w = np.linalg.solve(np.dot(txT, tx) + 2*N*lambda_ * np.identity(D) , np.dot(txT, y))
     e = y - tx.dot(w)
     if cost == 'mse':
         loss = compute_mse(e)
