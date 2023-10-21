@@ -3,50 +3,55 @@
 
 ### Code structure
 
-#### `scipts/basics.py`:
+#### `scripts/basics.py`:
 
-- train on a model
-- evaluate accuracy + f1 score
+- train on a model              DONE
+- evaluate accuracy + f1 score  DONE
 
 
-#### `scipts/helper.py`:
+#### `scripts/helper.py`:
 - compute mse
 - compute mae
 - compute gradient
 - batch-iter
 - compute stoch gradient
-- load csv des exos (to move/change)
-- create csv submissions (to move/change)
+- load csv des exos (to move)
+- create csv submissions (to move)
+- cross validation (in progress)
+- get confusion matrix          DONE  
+- find error points indices     DONE   
+
 
 #### `scipts/implementation.py`:
 - mean_squared_error_gd
 - mean_squared_error_sgd
 - least_squares
 - ridge_regression
-- logistic_regression
-- reg_logistic_regression
+- logistic_regression           check for loss -1,1/0,1
+- reg_logistic_regression       check for loss -1,1/0,1
 
-#### `scipts/preprocessing.py`:
-- load
+#### `scripts/preprocessing.py`:
+- load                      DONE
 - clean by removing nan/adding values
-- split
+- split                     DONE
 - remove const
 - remove directly correlated
 - poly augmentation
 - standardize
 - normalize
-- split data for folds (CV)
-- pca decomposition to get principal ocmponents
-- get confusion matrix
-- create submission file (to move here)
+- split data for folds (CV) DONE
+- pca decomposition         DONE
+- create submission file    DONE
 
-#### `scipts/run.py`:
+#### `scripts/run.py`:
 can run and will give all submission files we submit and talk about + the confusion matrices + our plots in a plots folder
 
 #### `scipts/visualisation.py`:
-- plotting confusion matrices
-- plotting pca results
+- plotting confusion matrices/f1/accuracy?
+- plotting pca results          DONE
 - plotting data with color code true false etc
+- plotting cross validation results figure with different losses
+
 
 
 
