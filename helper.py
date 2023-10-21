@@ -66,6 +66,23 @@ def batch_iter(y, tx, batch_size, num_batches=1, shuffle=True):
 
 def compute_stoch_gradient(y, tx, w):
     for minibatch_y, minibatch_tx in batch_iter(y, tx, 1):
+        e = minibatch_y - np.dot(minibatch_tx,w)
+        return -tx.T.dot(e) / len(e)
+
+def sigmoid(t):
+    """apply sigmoid function on t.
+
+    Args:
+        t: scalar or numpy array
+
+    Returns:
+        scalar or numpy array
+    """
+            
+    return 1.0 / (1.0 + np.exp(-t))
+
+def compute_stoch_gradient(y, tx, w):
+    for minibatch_y, minibatch_tx in batch_iter(y, tx, 1):
         return compute_gradient(minibatch_y, minibatch_tx, w)
 
 def load_csv_data(data_path, sub_sample=False):
