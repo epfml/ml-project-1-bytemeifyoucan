@@ -1,18 +1,6 @@
 import numpy as np
 # ========================
-def compute_mse(y, tx, w):
-    """Calculate the loss using MSE
 
-    Args:
-        y: numpy array of shape=(N, )
-        tx: numpy array of shape=(N,2)
-        w: numpy array of shape=(2,). The vector of model parameters.
-
-    Returns:
-        float: MSE across e
-    """
-    return 1/(2*len(y)) * ((y - tx.dot(w)) ** 2).sum()
-#WHICH ONE DO WE KEEP???
 def compute_mse(e): 
     """Calculate the loss using MAE.
 
@@ -35,9 +23,6 @@ def compute_mae(e):
         float: MAE across e
     """
     return np.mean(np.abs(e))
-
-def compute_gradient(y, tx, w):
-    return - 1/len(y) * tx.T.dot(y - tx.dot(w))
 
 def batch_iter(y, tx, batch_size, num_batches=1, shuffle=True):
     """
@@ -66,7 +51,20 @@ def batch_iter(y, tx, batch_size, num_batches=1, shuffle=True):
 
 def compute_stoch_gradient(y, tx, w):
     for minibatch_y, minibatch_tx in batch_iter(y, tx, 1):
-        return compute_gradient(minibatch_y, minibatch_tx, w)
+        e = minibatch_y - np.dot(minibatch_tx,w)
+        return -tx.T.dot(e) / len(e)
+
+def sigmoid(t):
+    """apply sigmoid function on t.
+
+    Args:
+        t: scalar or numpy array
+
+    Returns:
+        scalar or numpy array
+    """
+            
+    return 1.0 / (1.0 + np.exp(-t))
 
 def load_csv_data(data_path, sub_sample=False):
     """
