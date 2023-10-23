@@ -19,19 +19,13 @@ def mean_squared_error_gd(y, tx, initial_w, max_iters, gamma):
         float : mean squared erros
     """
     w = initial_w # initiate w_{t}
-    # for n_iter in range(max_iters):
-    #     new_w = w - gamma * compute_gradient(y, tx, w) # w_{t+1} = w_{t} - gamma * \/L(w_{t})
-    #     w = new_w # update w_{t} with the value of w_{t+1} for the next iteration
-    #     return w, compute_mse(y, tx, w)  
-    # ========================= YANN ^^
-    # ????????? which version do we keep 
-    # ========================= VIVA vv
+    for n_iter in range(max_iters):
+        e = y - np.dot(tx,w)
+        gradient = -tx.T.dot(e) / len(e)
+        new_w = w - gamma * gradient # w_{t+1} = w_{t} - gamma * \/L(w_{t})
+        w = new_w # update w_{t} with the value of w_{t+1} for the next iteration
     e = y - np.dot(tx,w)
-    gradient = -tx.T.dot(e) / len(e)
-    return gradient, e
-    
-    
-
+    return w, compute_mse(e)
 
 def mean_squared_error_sgd(y, tx, initial_w, max_iters, gamma):  
     """Calculates the gradient of the unregularized loss and uses it in stochastic gradient descent to approximate optimal weights
@@ -48,13 +42,6 @@ def mean_squared_error_sgd(y, tx, initial_w, max_iters, gamma):
         float : mean squared erros
     """
     w = initial_w # initiate w_{t}
-    # for n_iter in range(max_iters):
-    #     new_w = w - gamma * compute_stoch_gradient(y, tx, w) # w_{t+1} = w_{t} - gamma * \/L_n(w_{t})
-    #     w = new_w # update w_{t} with the value of w_{t+1} for the next iteration
-    # return w, compute_mse(y, tx, w)
-    # ========================= YANN ^^
-    # ????????? which version do we keep 
-    # ========================= VIVA vv
     for n_iter in range(max_iters):
         new_w = w - gamma * compute_stoch_gradient(y, tx, w) # w_{t+1} = w_{t} - gamma * \/L_n(w_{t})
         w = new_w # update w_{t} with the value of w_{t+1} for the next iteration
