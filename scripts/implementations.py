@@ -97,7 +97,8 @@ def ridge_regression(y, tx, lambda_, cost = 'mse'):
         loss = compute_mae(e)
     return w, loss
     
-def logistic_regression(y, tx, initial_w, max_iters, gamma):
+
+def logistic_regression(y, tx, initial_w, max_iters, gamma, labels=True):
     """Will perform logistic regression on tx and y, bu computing gradient and updating w max_iter times.
 
     Args:
@@ -106,27 +107,41 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma):
         initial_w (np.ndarray): shape = (2,) the initial weight pair that will get updated with gradient
         max_iters (int): maximum number of steps
         gamma (float): learning rate
+        labels: True (default) if we use {0,1} labels, False if we use {-1,1} labels
 
-    Returns:
+     Returns:
         np.ndarray : shape = (2,) optimal weights
         float : mean squared error
     """
-
     w = initial_w
 
-    for n_iter in range(max_iters):
-        s = sigmoid(tx.dot(w))
-        gradient = - (tx.T).dot(y - s) / len(y)
-        new_w = w - gamma * gradient # w_{t+1} = w_{t} - gamma * \/L_n(w_{t})
-        w = new_w # update w_{t} with the value of w_{t+1} for the next iteration
+    if(labels == True):
 
-    s = sigmoid(tx.dot(w))
-    loss = - np.mean(y * np.log(s) + (1 - y) * np.log(1 - s))
+        for n_iter in range(max_iters):
+            s = sigmoid(tx.dot(w))
+            gradient = - (tx.T).dot(y - s) / len(y)
+            new_w = w - gamma * gradient # w_{t+1} = w_{t} - gamma * \/L_n(w_{t})
+            w = new_w # update w_{t} with the value of w_{t+1} for the next iteration
+
+        s = sigmoid(tx.dot(w))
+        loss = - np.mean(y * np.log(s) + (1 - y) * np.log(1 - s))
+
+    if(labels == False):
+        # we use the Hinge loss for labels {-1, 1}
+        # H is the hinge loss vector
+
+        for n_iter in range(max_iters):
+            H = np.max(0, 1 - y * np.dot(tx, w))
+            gradient = -np.dot(tx.T, y * (H > 0))
+            new_w = w - gamma * gradient # w_{t+1} = w_{t} - gamma * \/L_n(w_{t})
+            w = new_w # update w_{t} with the value of w_{t+1} for the next iteration
+        
+        loss = np.mean(np.max(0, 1 - y * tx.dot(w)))
 
     return w, loss
 
     
-def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
+def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma, labels =True):
     """_summary_
 
     Args:
@@ -136,6 +151,7 @@ def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
         initial_w (np.ndarray): shape = (2,) the initial weight pair that will get updated with gradient
         max_iters (int): maximum number of steps
         gamma (float): learning rate
+        labels: True (default) if we use {0,1} labels, False if we use {-1,1} labels
 
     Returns:
         np.ndarray : shape = (2,) optimal weights
@@ -144,13 +160,27 @@ def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
 
     w = initial_w
 
-    for n_iter in range(max_iters):
-        s = sigmoid(tx.dot(w))
-        gradient = - (tx.T).dot(y - s) / len(y) +  2 * lambda_ * abs(w)
-        new_w = w - gamma * gradient # w_{t+1} = w_{t} - gamma * \/L_n(w_{t})
-        w = new_w # update w_{t} with the value of w_{t+1} for the next iteration
+    if(labels == True):
 
-    s = sigmoid(tx.dot(w))
-    loss = - np.mean(y * np.log(s) + (1 - y) * np.log(1 - s))
+        for n_iter in range(max_iters):
+            s = sigmoid(tx.dot(w))
+            gradient = - (tx.T).dot(y - s) / len(y) +  2 * lambda_ * abs(w)
+            new_w = w - gamma * gradient # w_{t+1} = w_{t} - gamma * \/L_n(w_{t})
+            w = new_w # update w_{t} with the value of w_{t+1} for the next iteration
+
+        s = sigmoid(tx.dot(w))
+        loss = - np.mean(y * np.log(s) + (1 - y) * np.log(1 - s))
+
+    if(labels == False):
+        # we use the Hinge loss for labels {-1, 1}
+        # H is the hinge loss vector
+
+        for n_iter in range(max_iters):
+            H = np.max(0, 1 - y * np.dot(tx, w))
+            gradient = -np.dot(tx.T, y * (H > 0)) +  2 * lambda_ * abs(w)
+            new_w = w - gamma * gradient # w_{t+1} = w_{t} - gamma * \/L_n(w_{t})
+            w = new_w # update w_{t} with the value of w_{t+1} for the next iteration
+        
+        loss = np.mean(np.max(0, 1 - y * tx.dot(w)))
 
     return w, loss
