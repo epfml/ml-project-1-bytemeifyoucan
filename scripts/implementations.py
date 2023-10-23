@@ -59,7 +59,7 @@ def least_squares(y, tx):
 
     Returns:
         np.ndarray : shape = (2,) optimal weights
-        float : mean squared erros
+        float : mean squared error
     """
     txT = tx.T #transpose calculation to avoid computing it twice in the arguments of np.linalg.solve
     w = np.linalg.solve(txT.dot(tx),txT.dot(y))
@@ -74,7 +74,7 @@ def ridge_regression(y, tx, lambda_, cost = 'mse'):
     Args:
         y: numpy array of shape (N,), N is the number of samples.
         tx: numpy array of shape (N,D), D is the number of features.
-        lambda_: scalar.
+        lambda_: penalization coefficient.
         cost: str {'mse', 'mae'}, default = 'mse', can also be 'mae
 
     Returns:
@@ -98,6 +98,19 @@ def ridge_regression(y, tx, lambda_, cost = 'mse'):
     return w, loss
     
 def logistic_regression(y, tx, initial_w, max_iters, gamma):
+    """Will perform logistic regression on tx and y, bu computing gradient and updating w max_iter times.
+
+    Args:
+        y (np.ndarray): shape = (N,) contains the data we want to predict
+        tx (np.ndarray): shape = (N,2) contains the features used to predict
+        initial_w (np.ndarray): shape = (2,) the initial weight pair that will get updated with gradient
+        max_iters (int): maximum number of steps
+        gamma (float): learning rate
+
+    Returns:
+        np.ndarray : shape = (2,) optimal weights
+        float : mean squared error
+    """
 
     w = initial_w
 
@@ -114,6 +127,20 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma):
 
     
 def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
+    """_summary_
+
+    Args:
+        y (np.ndarray): shape = (N,) contains the data we want to predict
+        tx (np.ndarray): shape = (N,2) contains the features used to predict
+        lambda_ (float): penalization coefficient
+        initial_w (np.ndarray): shape = (2,) the initial weight pair that will get updated with gradient
+        max_iters (int): maximum number of steps
+        gamma (float): learning rate
+
+    Returns:
+        np.ndarray : shape = (2,) optimal weights
+        float : mean squared error
+    """
 
     w = initial_w
 
