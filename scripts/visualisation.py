@@ -3,9 +3,11 @@
 #plotting data with color code true false etc
 import matplotlib.pyplot as plt
 import numpy as np
+from definitions import ROOT_DIR
+import os
 
 
-def cross_validation_visualization(lambds, rmse_tr, rmse_te, visualisation):
+def cross_validation_visualization(lambds, rmse_tr, rmse_te, visualisation, fig_name):
     #need to change path for saving
     """visualization the curves of rmse_tr and rmse_te."""
     plt.semilogx(lambds, rmse_tr, marker=".", color="b", label="train error")
@@ -18,14 +20,23 @@ def cross_validation_visualization(lambds, rmse_tr, rmse_te, visualisation):
     plt.grid(True)
     if visualisation == False:
         plt.close()
+    fig_path = os.path.join(ROOT_DIR, 'figures')
+    if not os.path.exists(fig_path):
+        os.makedirs(fig_path)
+    plt.savefig(os.path.join(fig_path, fig_name))
     plt.savefig("cross_validation")
     
-def plot_pca(n_components, eigenvalues, visualisation):
-    plt.plot(range(n_components, eigenvalues/np.sum(eigenvalues) * 100, color = 'blue', marker = 'x'))
+def plot_pca(n_components, eigenvalues, visualisation, fig_name):
+    eigenvalues_relative = eigenvalues/np.sum(eigenvalues) * 100
+    cum_eigenvalues = np.cumsum(eigenvalues_relative[: n_components])
+    plt.plot(range(n_components), cum_eigenvalues, color = 'blue', marker = 'x')
     plt.xlabel("Variance explained (%)")
     plt.ylabel("Principal Component")
     plt.title('Principal Component Analysis')
     plt.grid(True)
     if visualisation == False:
         plt.close()
-    plt.savefig('PCA')
+    fig_path = os.path.join(ROOT_DIR, 'figures')
+    if not os.path.exists(fig_path):
+        os.makedirs(fig_path)
+    plt.savefig(os.path.join(fig_path, fig_name))
