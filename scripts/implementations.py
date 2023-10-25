@@ -115,28 +115,14 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma, labels=True):
     """
     w = initial_w
 
-    if(labels == True):
-
-        for n_iter in range(max_iters):
-            s = sigmoid(tx.dot(w))
-            gradient = - (tx.T).dot(y - s) / len(y)
-            new_w = w - gamma * gradient # w_{t+1} = w_{t} - gamma * \/L_n(w_{t})
-            w = new_w # update w_{t} with the value of w_{t+1} for the next iteration
-
+    for n_iter in range(max_iters):
         s = sigmoid(tx.dot(w))
-        loss = - np.mean(y * np.log(s) + (1 - y) * np.log(1 - s))
+        gradient = - (tx.T).dot(y - s) / len(y)
+        new_w = w - gamma * gradient # w_{t+1} = w_{t} - gamma * \/L_n(w_{t})
+        w = new_w # update w_{t} with the value of w_{t+1} for the next iteration
 
-    if(labels == False):
-        # we use the Hinge loss for labels {-1, 1}
-        # H is the hinge loss vector
-
-        for n_iter in range(max_iters):
-            H = np.max(0, 1 - y * np.dot(tx, w))
-            gradient = -np.dot(tx.T, y * (H > 0))
-            new_w = w - gamma * gradient # w_{t+1} = w_{t} - gamma * \/L_n(w_{t})
-            w = new_w # update w_{t} with the value of w_{t+1} for the next iteration
-        
-        loss = np.mean(np.max(0, 1 - y * tx.dot(w)))
+    s = sigmoid(tx.dot(w))
+    loss = - np.mean(y * np.log(s) + (1 - y) * np.log(1 - s))
 
     return w, loss
 
@@ -160,27 +146,13 @@ def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma, labels 
 
     w = initial_w
 
-    if(labels == True):
-
-        for n_iter in range(max_iters):
-            s = sigmoid(tx.dot(w))
-            gradient = - (tx.T).dot(y - s) / len(y) +  2 * lambda_ * abs(w)
-            new_w = w - gamma * gradient # w_{t+1} = w_{t} - gamma * \/L_n(w_{t})
-            w = new_w # update w_{t} with the value of w_{t+1} for the next iteration
-
+    for n_iter in range(max_iters):
         s = sigmoid(tx.dot(w))
-        loss = - np.mean(y * np.log(s) + (1 - y) * np.log(1 - s))
+        gradient = - (tx.T).dot(y - s) / len(y) +  2 * lambda_ * abs(w)
+        new_w = w - gamma * gradient # w_{t+1} = w_{t} - gamma * \/L_n(w_{t})
+        w = new_w # update w_{t} with the value of w_{t+1} for the next iteration
 
-    if(labels == False):
-        # we use the Hinge loss for labels {-1, 1}
-        # H is the hinge loss vector
-
-        for n_iter in range(max_iters):
-            H = np.max(0, 1 - y * np.dot(tx, w))
-            gradient = -np.dot(tx.T, y * (H > 0)) +  2 * lambda_ * abs(w)
-            new_w = w - gamma * gradient # w_{t+1} = w_{t} - gamma * \/L_n(w_{t})
-            w = new_w # update w_{t} with the value of w_{t+1} for the next iteration
-        
-        loss = np.mean(np.max(0, 1 - y * tx.dot(w)))
+    s = sigmoid(tx.dot(w))
+    loss = - np.mean(y * np.log(s) + (1 - y) * np.log(1 - s))
 
     return w, loss
