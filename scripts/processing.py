@@ -175,7 +175,7 @@ def cv_loss(model, y, x, k_indices, k, lambda_, initial_w = 0, max_iters = 0, ga
 
 
 
-def run_pca(x, n_components, visualisation = False):
+def run_pca(x, n_components, fig_name = 'PCA_variance_ratios', visualisation = False):
     #use standardized data
     cov_mat = np.cov(x , rowvar = False)
     #Calculating Eigenvalues and Eigenvectors of the covariance matrix
@@ -190,7 +190,7 @@ def run_pca(x, n_components, visualisation = False):
     eigenvector_subset = sorted_eigenvectors[:,0:n_components]
     x_reduced = np.dot(eigenvector_subset.transpose(),x.transpose()).transpose()
     
-    plot_pca(n_components, sorted_eigenvalue, visualisation)
+    plot_pca(n_components, sorted_eigenvalue, visualisation, fig_name)
     
     return x_reduced
 

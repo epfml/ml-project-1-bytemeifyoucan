@@ -1,5 +1,5 @@
 from implementations import *
-from helpers import *
+from helper import *
 
 def train(model, y, x, initial_w = 0, max_iters = 0, gamma = 0, lambda_ = 0, cost = 'mse'):
     if model == 'gradient descent':
