@@ -1,4 +1,8 @@
+"""Some helper functions for project 1."""
+import csv
 import numpy as np
+import os
+
 # ========================
 def compute_mse(y, tx, w):
     """Calculate the loss using MSE
@@ -128,6 +132,13 @@ def load_csv_data(data_path, sub_sample=False):
 
     return x_train, x_test, y_train, train_ids, test_ids
 
+def standardize(x):
+    """Standardize the original data set."""
+    mean_x = np.mean(x, axis=0)
+    x = x - mean_x
+    std_x = np.std(x, axis=0)
+    x = x / std_x
+    return x, mean_x, std_x
 
 def create_csv_submission(ids, y_pred, name):
     """
