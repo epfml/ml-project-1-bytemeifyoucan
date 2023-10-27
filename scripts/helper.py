@@ -1,6 +1,7 @@
 import numpy as np
 from processing import *
 from visualisation import *
+from implementations import *
 
 def compute_mse(e): 
     """Calculate the loss using MAE.
@@ -105,7 +106,7 @@ def cross_validation(model, y, x, k_fold, lambdas, initial_w = 0, max_iters = 0,
     cross_validation_visualization(lambdas, rmse_tr, rmse_te, visualisation)
     return best_lambda, best_rmse
 
-def get_confusionm(predictions, groundtruth): 
+def get_confusion(predictions, groundtruth): 
     difference = groundtruth - predictions
     fp = np.count_nonzero(difference == -2)
     fn = np.count_nonzero(difference == 2)
@@ -118,3 +119,53 @@ def get_confusionm(predictions, groundtruth):
 def find_error(predictions, groundtruth):
     indices = np.where(predictions != groundtruth)[0]
     return indices
+
+def compute_losses_for_hyperparameters(model, y, tx, k_fold, w_initial=0, max_iters=0, lambdas = ['Nan'], gammas = ['Nan'], seed = 1):
+    """Process cross-validation with the chosen model 
+        Calculate the test and train errors for every hyperparameters 
+
+    Args:
+        model (string): name of the regression technique chosen
+        y (np.ndarray): shape = (N,) contains the data we want to predict
+        tx (np.ndarray): shape = (N,D) contains the features used to predict
+        initial_w (np.ndarray): shape = (D,) the initial weight pair that will get updated with gradient
+        max_iters (int): maximum number of steps
+        lambdas (np.ndarray): hyperparameter for the penalized loss for regularized regression
+        gammas (np.ndarray): hyperparameter for GD and SGD implementation
+        k_fold (int): K in K-fold, i.e. the fold num
+        seed (int):  the random seed
+
+    Returns:
+        np.ndarray : shape(N,5) train and test errors for each hyperparameters of the chosen model
+    """
+
+    results = np.array(["model", "lambda", "gamma", "train error", "test error"])
+    
+    k_indices = build_k_indices(y, k_fold, seed)
+
+    for lambda_ in lambdas:
+        for gamma in gammas:
+            losses_tr = []
+            losses_te = []
+            for k in range(k_fold): 
+                loss_tr, loss_te = cv_loss(model, y, tx, k_indices, k, lambda_, w_initial, max_iters, gamma)
+                losses_tr.append(loss_tr)
+                losses_te.append(loss_te)
+            loss_tr = np.mean(losses_tr)
+            loss_te = np.mean(losses_te)
+            results.append([model, lambda_, gamma, loss_tr, loss_te])
+
+    return results
+
+def find_best_hyperparameters(hyperparameter_losses):
+    """Calculate the best hyperparameters based on the test errors computed previously
+
+    Args:
+        np.ndarray : shape(N,5) train and test errors for each hyperparameters of the chosen model
+
+    Returns:
+        np.ndarray : shape (1,5) train and test errors for the best hyperparameters of the chosen model
+    """
+
+    min_index = np.argmin(hyperparameter_losses[-1], axis=1)
+    return hyperparameter_losses[min_index]
