@@ -98,7 +98,7 @@ def ridge_regression(y, tx, lambda_, cost = 'mse'):
     return w, loss
     
 
-def logistic_regression(y, tx, initial_w, max_iters, gamma, labels=True):
+def logistic_regression(y, tx, initial_w, max_iters, gamma):
     """Will perform logistic regression on tx and y, bu computing gradient and updating w max_iter times.
 
     Args:
@@ -127,7 +127,7 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma, labels=True):
     return w, loss
 
     
-def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma, labels =True):
+def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
     """_summary_
 
     Args:

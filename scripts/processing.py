@@ -123,7 +123,7 @@ def build_k_indices(y, k_fold, seed):
     k_indices = [indices[k * interval : (k + 1) * interval] for k in range(k_fold)]
     return np.array(k_indices)
 
-def cv_loss(model, y, x, k_indices, k, lambda_, initial_w = 0, max_iters = 0, gamma = 0):
+def cv_loss(model, y, x, k_indices, k, lambda_, initial_w, max_iters, gamma):
     """to complete ????
 
     Args:

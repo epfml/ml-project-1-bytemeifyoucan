@@ -148,3 +148,22 @@ def calculate_accuracy(y_true, y_pred):
     accuracy = correct / len(y_true)
 
     return accuracy
+
+def calculate_list_of_metrics(y_true, y_pred):
+    """Calculates a list of metrics for a given set of predictions and groundtruth in the following order
+        accuracy, f1 score, specificity, sensitivity, precision
+
+    Args:
+        y_true (np.ndarray): shape = (N,) contains the data we are provided with
+        y_pred (np.ndarray): shape = (N,) contains the data we predicted
+
+    Returns:
+        list (float): list of metrics
+    """
+
+    metrics = [calculate_accuracy(y_true, y_pred), 
+               calculate_f1_score(y_true, y_pred),
+               calculate_specificity(y_true, y_pred),
+               caclculate_sensitivity(y_true, y_pred),
+               calcuate_precision(y_true, y_pred)]
+    return metrics
