@@ -3,7 +3,6 @@
 #split
 #remove const
 #remove directly correlated
-#poly augmentation
 #standardize
 #normalize
 #split data for folds (CV)
@@ -54,6 +53,38 @@ def load_csv_data(data_path, sub_sample=False):
         train_ids = train_ids[::50]
 
     return x_train, x_test, y_train, train_ids, test_ids
+
+#======= DATA CLEANING ==========
+#get dictionnary with names DONE
+#remove the useless defined by yann
+#remove nan columns
+#remove constant columns
+#remove correlated columns
+#for categorical values do one hot encoding
+#for continuous values add value from same distrib/moyenne -> go check indices 
+#split avant de standardize -> no split for testx
+#standardize
+
+
+def remove_nan_columns(data,threshold=0.8):
+    #remove features with threshold for nan
+    nan_ratio = np.sum(np.isnan(data), axis = 0)/ data.shape[0]
+    columns_to_remove = np.where(nan_ratio > threshold)[0]
+    without_nan = np.delete(data, columns_to_remove, axis = 1)
+    return without_nan
+
+
+
+# complete datapoints for numerical features w const std et mean -> or knn? knn might take too much to run
+
+#remove correlated columns (try to always kick our the catsgorical one)
+
+#remove data with less than 0.25% variation - look at std
+
+
+# standardize numerical
+
+#find 10 columns that explain the most variance (not pc)
 
 def split_data(x, y, ratio, seed=1):
     """
