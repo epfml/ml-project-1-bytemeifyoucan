@@ -583,3 +583,57 @@ data_mapping = {
     "_STATE": ["categorical", 0]
 }
  
+correlated_with = {
+    "_AIDTST3": "HIVTST6",
+    "_PNEUMO2": "PNEUVAC3",
+    "_FLSHOT6": "FLUSHOT6",
+    "_PASTAE1": "_PAREC1",
+    "_PA30021": "_PA300R2",
+    "_TOTINDA": "EXERANY2",
+    "_RFDRHV5": "SEX, _DRNKWEK",
+    "_DRNKWEK": ("ALCDAY5", "AVEDRNK2", "DROCDY3_"),
+    "_RFBING5": ("ALCDAY", "DRNK3GE5"),
+    "DRNKANY5": "ALCDAY5",
+    "_RFSMOK3": "_SMOKER3",
+    "_SMOKER3": ("SMOKE100", "SMOKEDAY"),
+    "_INCOMG": "INCOME2",
+    "_EDUCAG": "EDUCA",
+    "_CHLDCNT": "CHILDREN",
+    "_RFBMI5": "_BMI5",
+    "_BMI5CAT": "_BMI5",
+    "HTIN4": "HEIGHT3",
+    "_AGE_G": "_IMPAGE",
+    "_AGE65YR": "AGE",
+    "_AGEG5YR": "AGE",
+    "_RACEGR3": "_RACE_G1",
+    "_RACEG21": "_RACE",
+    "_RACE": ("_HISPANC", "_MRACE1"),
+    "_MRACE1": "MRACASC1",
+    "_PRACE1": "MRACASC1",
+    "_DRDXAR1": "HAVARTH3",
+    "_CASTHM1": ("ASTHMA3", "ASTHNOW"),
+    "_LTASTH1": "ASTHMA3",
+    "_MICHD": ("CVDINFR4", "CVDCRHD4"),
+    "_RFCHOL": ("BLOODCHO", "TOLDHI2"),
+    "_CHOLCHK": ("BLOODCHO", "CHOLCHK"),
+    "_RFHYPE5": "BPHIGH4",
+    "_HCVU651": ("AGE", "HLTHPLN1"),
+    "_RFHLTH": "GENHLTH"
+}
+
+def delete_correlated_features(y, x):
+
+    key_to_delete = []
+
+    for key in correlated_with:
+        is_correlated = []
+        for _key in correlated_with[key]:
+            correlation = np.corrcoef(data_mapping[_key][1], data_mapping[key][1])
+            if correlation > 0.3 :
+                is_correlated.append(True)
+            else:
+                is_correlated.append(False)
+        if np.all(is_correlated):
+            key_to_delete = key  
+
+    return key_to_delete
