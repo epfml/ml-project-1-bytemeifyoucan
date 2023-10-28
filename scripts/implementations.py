@@ -146,11 +146,11 @@ def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
 
     w = initial_w
 
-        for n_iter in range(max_iters):
-            s = sigmoid(tx.dot(w))
-            gradient = - (tx.T).dot(y - s) / len(y) +  2 * lambda_ * np.abs(w)
-            new_w = w - gamma * gradient # w_{t+1} = w_{t} - gamma * \/L_n(w_{t})
-            w = new_w # update w_{t} with the value of w_{t+1} for the next iteration
+    for n_iter in range(max_iters):
+        s = sigmoid(tx.dot(w))
+        gradient = - (tx.T).dot(y - s) / len(y) +  2 * lambda_ * np.abs(w)
+        new_w = w - gamma * gradient # w_{t+1} = w_{t} - gamma * \/L_n(w_{t})
+        w = new_w # update w_{t} with the value of w_{t+1} for the next iteration
 
     s = sigmoid(tx.dot(w))
     loss = - np.mean(y * np.log(s) + (1 - y) * np.log(1 - s))
