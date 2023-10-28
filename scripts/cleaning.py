@@ -3,6 +3,8 @@ import csv
 import os
 from visualisation import *
 from implementations import *
+from matplotlib.ticker import AutoMinorLocator
+from definitions import ROOT_DIR
 #======= DATA CLEANING ==========
 #get dictionnary with names DONE
 #remove the useless defined by yann OK
@@ -469,6 +471,52 @@ def complete(data):
     completed_data[nan_mask] = np.take(column_means, np.where(nan_mask)[1])
     return completed_data
 
+def plot_const_thresholds(data, cat_ratios, con_ratios, filename, visualisation = False):
+    #plot how many we are keeping if we remove based on threshold for cat and num
+    continuous = get_type_features(data, 'continuous')
+    complete_continuous = complete(continuous) #choix à justifier ???
+    categorical = get_type_features(data, 'categorical')
+    
+    con_left = []
+    cat_left = []
+    for i in cat_ratios:
+        cat_left.append(np.shape(remove_constant_categorical(categorical, i))[1])
+        
+    for i in con_ratios:
+        con_left.append(np.shape(remove_constant_categorical(complete_continuous, i))[1])
+    
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(8, 6))
+    plt.suptitle('Remaining features when removing predictors containing values with freq > 1-ratio with various ratios')
+    ax1.plot(con_ratios, con_left, color='royalblue')
+    ax1.set_xlabel('Ratio')
+    ax1.set_ylabel('Continuous features left', color='royalblue')
+
+    ax2.plot(cat_ratios, cat_left, color='deeppink')
+    ax2.set_ylabel('Categorical features left', color='deeppink')
+    ax2.set_xlabel('Ratio')
+    
+    
+    
+    # Add minor ticks on the y-axis
+    ax1.xaxis.set_minor_locator(AutoMinorLocator(n=5))  
+    ax2.xaxis.set_minor_locator(AutoMinorLocator(n=5))
+    ax1.yaxis.set_minor_locator(AutoMinorLocator(n=5))   
+    ax2.yaxis.set_minor_locator(AutoMinorLocator(n=5)) 
+
+    # Add grid spanning both x and y ticks
+    ax1.grid(True, linestyle='--', which='both', linewidth=0.5)  
+    ax2.grid(True, linestyle='--', which='both', linewidth=0.5)  
+
+    #plt.grid(True)
+    plt.tight_layout()
+    
+    if visualisation == False:
+        plt.close()
+    fig_path = os.path.join(ROOT_DIR, 'figures')
+    if not os.path.exists(fig_path):
+        os.makedirs(fig_path)
+    plt.savefig(os.path.join(fig_path, filename))
+    
 def remove_constant_continuous(data_array, threshold_ratio=0.001):
     """
     Remove constant features from the data array based on a threshold ratio.
@@ -522,19 +570,26 @@ def delete_correlated_features(data):
 
     return key_to_delete
 
-def OneHotEncoder(categorical_data):
-    unique_labels = np.unique(feature)  # Find unique labels in the input list
-    num_unique_labels = len(unique_labels)
-    num_samples = len(feature)
+def BinaryOneHotEncoder(data):
+    num_samples, num_features = data.shape
 
-    # Create an empty array to hold the one-hot encoded values
-    encoded = np.zeros((num_samples, num_unique_labels))
+    binary_encodings = []
 
-    for i, label in enumerate(feature):
-        index = np.where(unique_labels == label)[0][0]  # Get the index of the label
-        encoded[i, index] = 1  # Set the corresponding value to 1 for the label
+    for feature_index in range(num_features):
+        column = data[:, feature_index]
+        unique_values = np.unique(column[~np.isnan(column)])
+        num_unique = len(unique_values)
 
-    return encoded 
+        binary_encoding = np.zeros((num_samples, num_unique), dtype=int)
+
+        for i, value in enumerate(column):
+            if not np.isnan(value):
+                index = np.where(unique_values == value)[0][0]
+                binary_encoding[i, index] = 1
+
+        binary_encodings.append(binary_encoding)
+
+    return np.concatenate(binary_encodings, axis=1)
     
 def standardize(data):
     """
