@@ -56,34 +56,111 @@ def load_csv_data(data_path, sub_sample=False):
 
 #======= DATA CLEANING ==========
 #get dictionnary with names DONE
-#remove the useless defined by yann
-#remove nan columns
-#remove constant columns
-#remove correlated columns
-#for categorical values do one hot encoding
+#remove the useless defined by yann OK
+#remove nan columns OK
+#remove constant columns 
+#remove correlated columns OK
+#for categorical values do one hot encoding 
 #for continuous values add mean DONE
-#split avant de standardize -> no split for testx
-#standardize                    DONE
+#split avant de standardize -> no split for testx 
+#standardize OK
+#                    DONE
+
 def get_type_features(data, type_):
-    #type_ = 'continuous' or 'categorical'
+    """
+    This function returns the data with the selected features type 
+
+    Args:
+        data (np.ndarray): data
+        type_ (string): type of the data, either 'continuous' or 'categorical'
+
+    Returns:
+        continuous_data or categorical_data (np.array): new data containing only the old data with the correct type
+    """
+
+    if(type_ != 'continuous' or 'categorical'):
+        raise TypeError("Type of data must be either categorical or continuous")
+    
     continuous_indices = [data_mapping[key][1] for key in data_mapping if data_mapping[key][0] == type_]
     continuous_data = data[:, continuous_indices]
     return continuous_data
     
 def remove_useless_features(data):
+    """
+    This function removes the useless features of the dataset (e.g. a phone number, hidden data)
+    These features are labelled as 'to_delete' in the data_mapping dictionnary
+
+    Args:
+        data (np.ndarray): data
+
+    Returns:
+        clean_data (np.ndarray): clean data
+    """
+
     columns_to_remove = [data_mapping[key][1] for key in data_mapping if data_mapping[key][0] == 'delete']
     clean_data = np.delete(data, columns_to_remove, axis = 1)
     return clean_data
     
-
 def remove_nan_columns(data,threshold=0.8):
-    #remove features with threshold for nan
+    """
+    This function removes the features containing more Nan values than the limit imposed by the treshold
+    This function removes from the dictionary data_mapping the removed feature
+    Then it updates their index
+
+    Args:
+        data (np.ndarray): data
+        threshold (float): threshold of maximum Nan values percentage by column, default = 0.8
+
+    Returns:
+        new_data (np.ndarray): data without the features containing too much Nan values to be releavant 
+    """
+
     nan_ratio = np.sum(np.isnan(data), axis = 0)/ data.shape[0]
     columns_to_remove = np.where(nan_ratio > threshold)[0]
     without_nan = np.delete(data, columns_to_remove, axis = 1)
+
+    # Step 1: Identify keys to delete
+    keys_to_delete = [key for key, value in data_mapping.items() if np.isin(value[1], columns_to_remove)]
+
+    # Step 2: Remove keys with 'delete' type
+    for key in keys_to_delete:
+        del data_mapping[key]
+
+    # Step 3: Adjust indexes for remaining features
+    remaining_keys = list(data_mapping.keys())
+    for i, key in enumerate(remaining_keys):
+        data_mapping[key][1] = i
+
     return without_nan
 
+def delete_correlated_features(data):
+    key_to_delete = []
+
+    for key in correlated_with:
+        is_correlated = []
+        first_feature = data[:data_mapping[key][1]]
+        for _key in correlated_with[key]:
+            second_feature = data[:data_mapping[_key][1]]
+            correlation = np.corrcoef(first_feature, second_feature)
+            if correlation > 0.3 :
+                is_correlated.append(True)
+            else:
+                is_correlated.append(False)
+        if np.all(is_correlated):
+            key_to_delete = key  
+
+    return key_to_delete
+
 def complete(data):
+    """
+    This function complete continuous features containing Nan values 
+
+    Args:
+        data (np.ndarray): data
+
+    Returns:
+        completed_data (np.ndarray): completed data
+    """
     #avg add
     completed_data = data.copy()
     column_means = np.nanmean(completed_data, axis=0)
@@ -96,13 +173,40 @@ def complete(data):
     return completed_data
     
 def standardize(data):
-    #Standardize the data by subtracting the mean and dividing by the standard deviation.
+    """
+    This function standardizes the continuous features that had been previously completed to get rid of Nan values
+    Standardize the data by subtracting the mean and dividing by the standard deviation.
+    
+    Args:
+        data (np.ndarray): data
+
+    Returns:
+        standardized_data (np.ndarray): standardized data
+    """
+
     means = np.mean(data, axis = 0)
     stds = np.std(data, axis = 0)
     
     standardized_data = (data - means)/ stds
     
     return standardized_data
+
+def clean_data_mapping():
+    """
+    This function removes from the dictionary data_mapping the feature labelled as 'to_delete'
+    Then it updates their index
+    """
+    # Step 1: Identify keys to delete
+    keys_to_delete = [key for key, value in data_mapping.items() if value[0] == 'delete']
+
+    # Step 2: Remove keys with 'delete' type
+    for key in keys_to_delete:
+        del data_mapping[key]
+
+    # Step 3: Adjust indexes for remaining features
+    remaining_keys = list(data_mapping.keys())
+    for i, key in enumerate(remaining_keys):
+        data_mapping[key][1] = i
 
 def split_data(x, y, ratio, seed=1):
     """
@@ -143,14 +247,65 @@ def split_data(x, y, ratio, seed=1):
     
     
     return x_tr, x_te, y_tr, y_te
+    
+def clean(data, train = True):
+    
+    clean_data = data.copy()
 
-# def clean(data, train = True):
-    
-#     if train:
-#         split data
-    
-#     return clean_data
-    
+    if train:
+       split_ratio = 0.8
+       x_tr, x_te, y_tr, y_te = split_data(x, y, split_ratio) # issue
+       clean_data = x_tr
+
+    clean_data = remove_useless_features(clean_data)
+    clean_data_mapping()
+
+    clean_data = remove_nan_columns(clean_data)
+
+    for key, value in data_mapping.items():
+        if value[0] == 'continuous':
+            col_to_change = clean_data[:,value[1]]
+            update_col = complete(col_to_change)
+            update_col = standardize(update_col)
+            clean_data[:,value[1]] = update_col
+
+    keys_to_delete = delete_correlated_features(data)
+    # Step 2: Remove keys with 'delete' type
+    for key in keys_to_delete:
+        del data_mapping[key]
+    # Step 3: Adjust indexes for remaining features
+    remaining_keys = list(data_mapping.keys())
+    for i, key in enumerate(remaining_keys):
+        data_mapping[key][1] = i
+
+    categorical_data_encoded = []
+    for key, value in data_mapping.items():
+        if value[0] == 'categorical':
+            col = clean_data[:,value[1]]
+            new_cols = perform_one_hot_encoding(col)
+            categorical_data_encoded = np.append(categorical_data_encoded, new_cols, axis=1)
+
+    ### VARIANCE : CONST FEATURE ???
+
+    continuous_data = get_type_features(clean_data, 'continuous')
+    clean_data = np.concatenate(continuous_data, categorical_data_encoded, axis=1)
+
+    return clean_data
+
+def perform_one_hot_encoding(feature):
+    unique_labels = np.unique(feature)  # Find unique labels in the input list
+    num_unique_labels = len(unique_labels)
+    num_samples = len(feature)
+
+    # Create an empty array to hold the one-hot encoded values
+    encoded = np.zeros((num_samples, num_unique_labels))
+
+    for i, label in enumerate(feature):
+        index = np.where(unique_labels == label)[0][0]  # Get the index of the label
+        encoded[i, index] = 1  # Set the corresponding value to 1 for the label
+
+    return encoded 
+
 def build_k_indices(y, k_fold, seed):
     """build k indices for k-fold.
 
@@ -223,8 +378,6 @@ def cv_loss(model, y, x, k_indices, k, lambda_, initial_w, max_iters, gamma):
     loss_tr = np.sqrt(2*compute_mse(y_tr, x_tr, w))
     return loss_tr, loss_te
 
-
-
 def run_pca(x, n_components, fig_name = 'PCA_variance_ratios', visualisation = False):
     #use standardized data
     cov_mat = np.cov(x , rowvar = False)
@@ -243,8 +396,6 @@ def run_pca(x, n_components, fig_name = 'PCA_variance_ratios', visualisation = F
     plot_pca(n_components, sorted_eigenvalue, visualisation, fig_name)
     
     return x_reduced
-
-
 
 def create_csv_submission(ids, y_pred, name):
     """
@@ -268,19 +419,7 @@ def create_csv_submission(ids, y_pred, name):
         for r1, r2 in zip(ids, y_pred):
             writer.writerow({"Id": int(r1), "Prediction": int(r2)})
 
-
-def clean_data_mapping():
-    # Step 1: Identify keys to delete
-    keys_to_delete = [key for key, value in data_dict.items() if value[0] == 'delete']
-
-    # Step 2: Remove keys with 'delete' type
-    for key in keys_to_delete:
-        del data_dict[key]
-
-    # Step 3: Adjust indexes for remaining features
-    remaining_keys = list(data_dict.keys())
-    for i, key in enumerate(remaining_keys):
-        data_dict[key][1] = i
+# The following dictionary maps the feature name to its type and its index in the raw data
 
 data_mapping = {
     "_AIDTST3": ["categorical", 330],
@@ -615,7 +754,10 @@ data_mapping = {
     "FMONTH": ["delete", 1],
     "_STATE": ["categorical", 0]
 }
- 
+
+# The following dictionary maps some features to the ones they are supposed to be correlated with
+# in order to remove them from the data (it will be checked in the process of cleaning the data)
+
 correlated_with = {
     "_AIDTST3": "HIVTST6",
     "_PNEUMO2": "PNEUVAC3",
@@ -652,22 +794,4 @@ correlated_with = {
     "_RFHYPE5": "BPHIGH4",
     "_HCVU651": ("AGE", "HLTHPLN1"),
     "_RFHLTH": "GENHLTH"
-}
-
-def delete_correlated_features(y, x):
-
-    key_to_delete = []
-
-    for key in correlated_with:
-        is_correlated = []
-        for _key in correlated_with[key]:
-            correlation = np.corrcoef(data_mapping[_key][1], data_mapping[key][1])
-            if correlation > 0.3 :
-                is_correlated.append(True)
-            else:
-                is_correlated.append(False)
-        if np.all(is_correlated):
-            key_to_delete = key  
-
-    return key_to_delete
 }
