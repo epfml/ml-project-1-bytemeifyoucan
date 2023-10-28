@@ -58,13 +58,12 @@ def load_csv_data(data_path, sub_sample=False):
 #get dictionnary with names DONE
 #remove the useless defined by yann OK
 #remove nan columns OK
-#remove constant columns 
+#remove constant columns DONE
 #remove correlated columns OK
-#for categorical values do one hot encoding 
+#for categorical values do one hot encoding -----CHECK YANN
 #for continuous values add mean DONE
-#split avant de standardize -> no split for testx 
 #standardize OK
-#                    DONE
+#clean function DONE
 
 def get_type_features(data, type_):
     """
@@ -81,9 +80,9 @@ def get_type_features(data, type_):
     if(type_ != 'continuous' or 'categorical'):
         raise TypeError("Type of data must be either categorical or continuous")
     
-    continuous_indices = [data_mapping[key][1] for key in data_mapping if data_mapping[key][0] == type_]
-    continuous_data = data[:, continuous_indices]
-    return continuous_data
+    indices = [data_mapping[key][1] for key in data_mapping if data_mapping[key][0] == type_]
+    type_data = data[:, indices]
+    return type_data
     
 def remove_useless_features(data):
     """
@@ -133,6 +132,42 @@ def remove_nan_columns(data,threshold=0.8):
 
     return without_nan
 
+def remove_constant_continuous(data_array, threshold_ratio=0.001):
+    """
+    Remove constant features from the data array based on a threshold ratio.
+
+    Parameters:
+    - data_array: NumPy array containing the data.
+    - threshold_ratio: Threshold ratio for standard deviation. Features with
+      standard deviation less than or equal to threshold_ratio * max_std will be removed.
+
+    Returns:
+    - array_without_constants: NumPy array with constant features removed.
+    """
+    std_values = np.std(data_array, axis=0)
+    max_std = np.max(std_values)
+    
+    # Identify constant features based on the threshold ratio
+    constant_features = np.where(std_values <= threshold_ratio * max_std)[0]
+
+    # Remove constant features
+    array_without_constants = np.delete(data_array, constant_features, axis=1)
+
+    return array_without_constants
+
+def remove_constant_categorical(data, threshold=0.001):
+    constant_cols = []
+    for i in range(data.shape[1]):
+
+        unique_vals, counts = np.unique(~np.isnan(data[:, i]), return_counts=True)
+        freq = counts.max() / len(data)
+        if freq > 1 - threshold:
+            constant_cols.append(i)
+    
+    data_filtered = np.delete(data, constant_cols, axis=1)
+
+    return data_filtered
+    
 def delete_correlated_features(data):
     key_to_delete = []
 
@@ -248,7 +283,51 @@ def split_data(x, y, ratio, seed=1):
     
     return x_tr, x_te, y_tr, y_te
     
-def clean(data, train = True):
+def clean_VIVA(data, train = True):
+    
+    clean_data = data.copy()
+
+    if train:
+       split_ratio = 0.8
+       x_tr, x_te, y_tr, y_te = split_data(x, y, split_ratio) # issue
+       clean_data = x_tr
+
+    clean_data = remove_useless_features(clean_data)
+    clean_data_mapping()
+
+    clean_data = remove_nan_columns(clean_data)
+
+    for key, value in data_mapping.items():
+        if value[0] == 'continuous':
+            col_to_change = clean_data[:,value[1]]
+            update_col = complete(col_to_change)
+            update_col = standardize(update_col)
+            clean_data[:,value[1]] = update_col
+
+    keys_to_delete = delete_correlated_features(data)
+    # Step 2: Remove keys with 'delete' type
+    for key in keys_to_delete:
+        del data_mapping[key]
+    # Step 3: Adjust indexes for remaining features
+    remaining_keys = list(data_mapping.keys())
+    for i, key in enumerate(remaining_keys):
+        data_mapping[key][1] = i
+
+    categorical_data_encoded = []
+    for key, value in data_mapping.items():
+        if value[0] == 'categorical':
+            col = clean_data[:,value[1]]
+            new_cols = perform_one_hot_encoding(col)
+            categorical_data_encoded = np.append(categorical_data_encoded, new_cols, axis=1)
+
+    ### VARIANCE : CONST FEATURE ???
+
+    continuous_data = get_type_features(clean_data, 'continuous')
+    clean_data = np.concatenate(continuous_data, categorical_data_encoded, axis=1)
+
+    return clean_data
+
+def clean_YANN(data, train = True):
     
     clean_data = data.copy()
 
