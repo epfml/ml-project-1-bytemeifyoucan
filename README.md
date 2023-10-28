@@ -14,13 +14,15 @@
 - remove the 'delete' type features: remove_useless_features(data)
 - remove features with ratio of NaNs above threshold parameter: remove_nan_columns(data, threshold=0.8)???? checker le threshold par defaut
 - mean imputation on (continuous) data: complete(data)
+- plot_const_thresholds(data, cat_ratios, con_ratios, filename, visualisation = False) ????a completer
 - removing low-deviation continuous features with std < threshold_ratio * maximum std: remove_constant_continuous(data_array, threshold_ratio=0.001)??????? 
 - removing the features which have a high maximal frequency for a class: remove_constant_categorical(data, threshold=0.001)
 - ????YANN DECRIRE ????? delete_correlated_features(data)
-- OneHotEncoder(categorical_data)
+- BinaryOneHotEncoder(data)  ????a completer
 - standardizing (continuous) data: standardize(data)
 - ????YANN DECRIRE ????? clean_data_mapping()
 - ????? dire pour le dictionnaire sans les delete pour les indexes
+
 - applying preprocessing steps to data: ???? clean data function
 
 
