@@ -40,3 +40,25 @@ def plot_pca(n_components, eigenvalues, visualisation, fig_name):
     if not os.path.exists(fig_path):
         os.makedirs(fig_path)
     plt.savefig(os.path.join(fig_path, fig_name))
+
+
+def plot_train_test(model, train_errors, test_errors, lambdas, gammas=0):
+    """
+    train_errors, test_errors and lambas should be list (of the same size) the respective train error and test error for a given lambda,
+    * lambda[0] = 1
+    * train_errors[0] = RMSE of a ridge regression on the train set
+    * test_errors[0] = RMSE of the parameter found by ridge regression applied on the test set
+    """
+    if(len(gammas) > 7):
+        raise ValueError("You can plot up to 7 different gammas on the same graph")
+    colors = ['r', 'b', 'g', 'c', 'm', 'y', 'k']
+    for i, gamma in enumerate(gammas):
+        plt.semilogx(lambdas, train_errors[i], color=colors[i], linestyle='--', marker='.', label="Train error for gamma = " + str(gamma))
+        plt.semilogx(lambdas, test_errors[i], color=colors[i], linestyle='-', marker='.', label="Test error for gamma = " + str(gamma))
+    plt.xlabel("lambda")
+    plt.ylabel("RMSE")
+    plt.title(f'{model}')
+
+    leg = plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.1), shadow=True, ncol=2)  # Position legend beneath the plot
+    leg.draw_frame(False)
+    plt.savefig(f'{model}')
