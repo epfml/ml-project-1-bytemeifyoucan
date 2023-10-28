@@ -570,6 +570,18 @@ def delete_correlated_features(data):
 
     return key_to_delete
 
+def filter_unique_values(data, max_unique_values=50):
+    # Get the number of unique values in each column
+    unique_counts = np.apply_along_axis(lambda col: len(np.unique(col)), axis=0, arr=data)
+    
+    # Identify columns with less than or equal to max_unique_values unique values
+    selected_columns = unique_counts <= max_unique_values
+    
+    # Filter the array to keep only the selected columns
+    filtered_array = data[:, selected_columns]
+    
+    return filtered_array
+
 def BinaryOneHotEncoder(data):
     num_samples, num_features = data.shape
 
