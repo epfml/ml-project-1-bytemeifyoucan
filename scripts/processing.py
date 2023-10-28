@@ -1,13 +1,6 @@
-#load
-#clean by removing nan/adding values
-#split
-#remove const
-#remove directly correlated
-#standardize
-#normalize
-#split data for folds (CV)
-#pca decomposition to get principal ocmponents
 import numpy as np
+import csv
+import os
 from visualisation import *
 from implementations import *
 
@@ -77,8 +70,8 @@ def get_type_features(data, type_):
         continuous_data or categorical_data (np.array): new data containing only the old data with the correct type
     """
 
-    if(type_ != 'continuous' or 'categorical'):
-        raise TypeError("Type of data must be either categorical or continuous")
+    if type_  != 'continuous' or type_ != 'categorical':
+        raise TypeError(f"Type of data must be either categorical or continuous, you wrote {type_}")
     
     indices = [data_mapping[key][1] for key in data_mapping if data_mapping[key][0] == type_]
     type_data = data[:, indices]
@@ -132,60 +125,6 @@ def remove_nan_columns(data,threshold=0.8):
 
     return without_nan
 
-def remove_constant_continuous(data_array, threshold_ratio=0.001):
-    """
-    Remove constant features from the data array based on a threshold ratio.
-
-    Parameters:
-    - data_array: NumPy array containing the data.
-    - threshold_ratio: Threshold ratio for standard deviation. Features with
-      standard deviation less than or equal to threshold_ratio * max_std will be removed.
-
-    Returns:
-    - array_without_constants: NumPy array with constant features removed.
-    """
-    std_values = np.std(data_array, axis=0)
-    max_std = np.max(std_values)
-    
-    # Identify constant features based on the threshold ratio
-    constant_features = np.where(std_values <= threshold_ratio * max_std)[0]
-
-    # Remove constant features
-    array_without_constants = np.delete(data_array, constant_features, axis=1)
-
-    return array_without_constants
-
-def remove_constant_categorical(data, threshold=0.001):
-    constant_cols = []
-    for i in range(data.shape[1]):
-
-        unique_vals, counts = np.unique(~np.isnan(data[:, i]), return_counts=True)
-        freq = counts.max() / len(data)
-        if freq > 1 - threshold:
-            constant_cols.append(i)
-    
-    data_filtered = np.delete(data, constant_cols, axis=1)
-
-    return data_filtered
-    
-def delete_correlated_features(data):
-    key_to_delete = []
-
-    for key in correlated_with:
-        is_correlated = []
-        first_feature = data[:data_mapping[key][1]]
-        for _key in correlated_with[key]:
-            second_feature = data[:data_mapping[_key][1]]
-            correlation = np.corrcoef(first_feature, second_feature)
-            if correlation > 0.3 :
-                is_correlated.append(True)
-            else:
-                is_correlated.append(False)
-        if np.all(is_correlated):
-            key_to_delete = key  
-
-    return key_to_delete
-
 def complete(data):
     """
     This function complete continuous features containing Nan values 
@@ -206,6 +145,73 @@ def complete(data):
     # Replace NaN values with the mean of their respective columns
     completed_data[nan_mask] = np.take(column_means, np.where(nan_mask)[1])
     return completed_data
+
+def remove_constant_continuous(data_array, threshold_ratio=0.001):
+    """
+    Remove constant features from the data array based on a threshold ratio.
+
+    Parameters:
+    - data_array: NumPy array containing the data.
+    - threshold_ratio: Threshold ratio for standard deviation. Features with
+      standard deviation less than or equal to threshold_ratio * max_std will be removed.
+
+    Returns:
+    - array_without_constants: NumPy array with constant features removed.
+    """
+    std_values = np.std(data_array, axis=0)
+    max_std = np.max(std_values)
+    
+    # Identify constant features based on the threshold ratio
+    constant_features = np.where(std_values < threshold_ratio * max_std)[0] #the max_std factor is to make the values more comparable
+
+    # Remove constant features
+    array_without_constants = np.delete(data_array, constant_features, axis=1)
+
+    return array_without_constants
+
+def remove_constant_categorical(data, threshold=0.001):
+    #removing the features which have a high maximal frequency for a unique value 
+    constant_cols = []
+    for i in range(data.shape[1]):
+        unique_vals, counts = np.unique(~np.isnan(data[:, i]), return_counts=True)
+        freq = counts.max() / len(data)
+        if freq > 1 - threshold:
+            constant_cols.append(i)
+    
+    data_filtered = np.delete(data, constant_cols, axis=1)
+    return data_filtered
+    
+def delete_correlated_features(data):
+    key_to_delete = []
+
+    for key in correlated_with:
+        is_correlated = []
+        first_feature = data[:data_mapping[key][1]]
+        for _key in correlated_with[key]:
+            second_feature = data[:data_mapping[_key][1]]
+            correlation = np.corrcoef(first_feature, second_feature)
+            if correlation > 0.3 :
+                is_correlated.append(True)
+            else:
+                is_correlated.append(False)
+        if np.all(is_correlated):
+            key_to_delete = key  
+
+    return key_to_delete
+
+def OneHotEncoder(categorical_data):
+    unique_labels = np.unique(feature)  # Find unique labels in the input list
+    num_unique_labels = len(unique_labels)
+    num_samples = len(feature)
+
+    # Create an empty array to hold the one-hot encoded values
+    encoded = np.zeros((num_samples, num_unique_labels))
+
+    for i, label in enumerate(feature):
+        index = np.where(unique_labels == label)[0][0]  # Get the index of the label
+        encoded[i, index] = 1  # Set the corresponding value to 1 for the label
+
+    return encoded 
     
 def standardize(data):
     """
@@ -371,21 +377,7 @@ def clean_YANN(data, train = True):
 
     return clean_data
 
-def perform_one_hot_encoding(feature):
-    unique_labels = np.unique(feature)  # Find unique labels in the input list
-    num_unique_labels = len(unique_labels)
-    num_samples = len(feature)
-
-    # Create an empty array to hold the one-hot encoded values
-    encoded = np.zeros((num_samples, num_unique_labels))
-
-    for i, label in enumerate(feature):
-        index = np.where(unique_labels == label)[0][0]  # Get the index of the label
-        encoded[i, index] = 1  # Set the corresponding value to 1 for the label
-
-    return encoded 
-
-def build_k_indices(y, k_fold, seed):
+def build_k_indices(y, k_fold, seed=1):
     """build k indices for k-fold.
 
     Args:

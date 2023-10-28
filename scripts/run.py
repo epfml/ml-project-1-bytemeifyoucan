@@ -13,6 +13,8 @@
 # evaluate our predictions
 # make submission 
 
+#do multiple runs with different preprocessing steps (ratio split, ratio for nan, threshold for const)
+
 
 
 # we need to end up w/
