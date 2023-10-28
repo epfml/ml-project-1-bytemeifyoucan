@@ -42,7 +42,7 @@ def plot_pca(n_components, eigenvalues, visualisation, fig_name):
     plt.savefig(os.path.join(fig_path, fig_name))
 
 
-def plot_train_test(model, train_errors, test_errors, lambdas, gammas=0):
+def plot_train_test(model, train_errors, test_errors, lambdas, gammas=0, visualisation = False):
     """
     train_errors, test_errors and lambas should be list (of the same size) the respective train error and test error for a given lambda,
     * lambda[0] = 1
@@ -61,4 +61,37 @@ def plot_train_test(model, train_errors, test_errors, lambdas, gammas=0):
 
     leg = plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.1), shadow=True, ncol=2)  # Position legend beneath the plot
     leg.draw_frame(False)
-    plt.savefig(f'{model}')
+
+    if visualisation == False:
+        plt.close()
+    fig_path = os.path.join(ROOT_DIR, 'figures')
+    if not os.path.exists(fig_path):
+        os.makedirs(fig_path)
+    plt.savefig(os.path.join(fig_path, f'errors_{model}'))
+
+def plot_metrics(model, metrics, thresholds, visualisation = False):
+   
+    if(len(thresholds) > 7):
+        raise ValueError("You can plot up to 7 differents thresholds on the same graph, you tried to plot " + str(len(thresholds)))
+    
+    colors = ['r', 'b', 'g', 'c', 'm', 'y', 'k']
+
+    # Plotting each metric as a bar plot
+    for i, metric in enumerate(metrics):
+        positions = np.arange(len(metric)) + i * 0.2
+        plt.bar(positions, metric, width=0.2, color=colors[i], label=f'Threshold {thresholds[i]}')
+
+    custom_labels = ['accuracy', 'f1 score', 'specificity', 'sensitivity', 'precision']
+    # Replace x-axis numeric indices with custom labels
+    plt.xticks(np.arange(len(custom_labels)) + 0.2, custom_labels)
+
+    plt.title(f'Metrics obtained with {model}')
+    leg = plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.1), shadow=True, ncol=len(thresholds))  # Position legend beneath the plot
+    leg.draw_frame(False)
+
+    if visualisation == False:
+        plt.close()
+    fig_path = os.path.join(ROOT_DIR, 'figures')
+    if not os.path.exists(fig_path):
+        os.makedirs(fig_path)
+    plt.savefig(os.path.join(fig_path, f'metrics_{model}.png'))
