@@ -13,7 +13,7 @@
 # evaluate our predictions
 # make submission 
 
-#do multiple runs with different preprocessing steps (ratio split, ratio for nan, threshold for const)
+#do multiple runs with different preprocessing steps (ratio split, ratio for nan, threshold for const, pca or not)
 
 
 
