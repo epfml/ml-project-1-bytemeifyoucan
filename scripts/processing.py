@@ -61,10 +61,20 @@ def load_csv_data(data_path, sub_sample=False):
 #remove constant columns
 #remove correlated columns
 #for categorical values do one hot encoding
-#for continuous values add value from same distrib/moyenne -> go check indices 
+#for continuous values add mean DONE
 #split avant de standardize -> no split for testx
-#standardize
-
+#standardize                    DONE
+def get_type_features(data, type_):
+    #type_ = 'continuous' or 'categorical'
+    continuous_indices = [data_mapping[key][1] for key in data_mapping if data_mapping[key][0] == type_]
+    continuous_data = data[:, continuous_indices]
+    return continuous_data
+    
+def remove_useless_features(data):
+    columns_to_remove = [data_mapping[key][1] for key in data_mapping if data_mapping[key][0] == 'delete']
+    clean_data = np.delete(data, columns_to_remove, axis = 1)
+    return clean_data
+    
 
 def remove_nan_columns(data,threshold=0.8):
     #remove features with threshold for nan
@@ -73,18 +83,26 @@ def remove_nan_columns(data,threshold=0.8):
     without_nan = np.delete(data, columns_to_remove, axis = 1)
     return without_nan
 
+def complete(data):
+    #avg add
+    completed_data = data.copy()
+    column_means = np.nanmean(completed_data, axis=0)
 
+    # Find NaN values in the array
+    nan_mask = np.isnan(completed_data)
 
-# complete datapoints for numerical features w const std et mean -> or knn? knn might take too much to run
-
-#remove correlated columns (try to always kick our the catsgorical one)
-
-#remove data with less than 0.25% variation - look at std
-
-
-# standardize numerical
-
-#find 10 columns that explain the most variance (not pc)
+    # Replace NaN values with the mean of their respective columns
+    completed_data[nan_mask] = np.take(column_means, np.where(nan_mask)[1])
+    return completed_data
+    
+def standardize(data):
+    #Standardize the data by subtracting the mean and dividing by the standard deviation.
+    means = np.mean(data, axis = 0)
+    stds = np.std(data, axis = 0)
+    
+    standardized_data = (data - means)/ stds
+    
+    return standardized_data
 
 def split_data(x, y, ratio, seed=1):
     """
@@ -126,11 +144,12 @@ def split_data(x, y, ratio, seed=1):
     
     return x_tr, x_te, y_tr, y_te
 
-def standardize_data():
-    return 0
+# def clean(data, train = True):
     
-def normalise_data():
-    return 0
+#     if train:
+#         split data
+    
+#     return clean_data
     
 def build_k_indices(y, k_fold, seed):
     """build k indices for k-fold.
@@ -248,6 +267,20 @@ def create_csv_submission(ids, y_pred, name):
         writer.writeheader()
         for r1, r2 in zip(ids, y_pred):
             writer.writerow({"Id": int(r1), "Prediction": int(r2)})
+
+
+def clean_data_mapping():
+    # Step 1: Identify keys to delete
+    keys_to_delete = [key for key, value in data_dict.items() if value[0] == 'delete']
+
+    # Step 2: Remove keys with 'delete' type
+    for key in keys_to_delete:
+        del data_dict[key]
+
+    # Step 3: Adjust indexes for remaining features
+    remaining_keys = list(data_dict.keys())
+    for i, key in enumerate(remaining_keys):
+        data_dict[key][1] = i
 
 data_mapping = {
     "_AIDTST3": ["categorical", 330],
@@ -637,3 +670,4 @@ def delete_correlated_features(y, x):
             key_to_delete = key  
 
     return key_to_delete
+}
