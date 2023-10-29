@@ -395,8 +395,8 @@ def get_type_features(data, type_):
         continuous_data or categorical_data (np.array): new data containing only the old data with the correct type
     """
 
-    if type_  != 'continuous' or type_ != 'categorical':
-        raise TypeError(f"Type of data must be either categorical or continuous, you wrote {type_}")
+    #if type_  != 'continuous' or type_ != 'categorical':
+    #    raise TypeError(f"Type of data must be either categorical or continuous")
     
     indices = [data_mapping[key][1] for key in data_mapping if data_mapping[key][0] == type_]
     type_data = data[:, indices]
