@@ -149,7 +149,7 @@ def calculate_accuracy(y_true, y_pred):
 
     return accuracy
 
-def calculate_list_of_metrics(y_true, y_pred):
+def calculate_metrics(y_true, y_pred):
     """Calculates a list of metrics for a given set of predictions and groundtruth in the following order
         accuracy, f1 score, specificity, sensitivity, precision
 
@@ -167,3 +167,8 @@ def calculate_list_of_metrics(y_true, y_pred):
                caclculate_sensitivity(y_true, y_pred),
                calcuate_precision(y_true, y_pred)]
     return metrics
+
+def prettyprint(metrics):
+    print(f'Accuracy: {metrics[0]} - F1 score {metrics[1]}')
+    print(f'Scpecificity: {metrics[2]} - Sensitivity: {metrics[3]}')
+    print(f'Precision: {metrics[4]}')

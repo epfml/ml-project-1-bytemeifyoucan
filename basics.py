@@ -10,7 +10,6 @@ def train(model, y, x, initial_w = 0, max_iters = 0, gamma = 0, lambda_ = 0, cos
     elif model == 'least squares':
         w, loss = least_squares(y, x)
         
-        
     elif model == 'ridge regression':
         w, loss = ridge_regression(y, x, lambda_, cost)
         
@@ -25,7 +24,7 @@ def train(model, y, x, initial_w = 0, max_iters = 0, gamma = 0, lambda_ = 0, cos
         return 0
     return w, loss
         
-def estimate(predictions, groundtruth):
+def estimate(predictions, groundtruth): #to delete
     #if y is -1 or 1. need to change to 1 and -1 if y is 0,1
     #here assuming negative is -1 and positive 1
     difference = groundtruth - predictions

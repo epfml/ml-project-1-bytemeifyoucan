@@ -3,6 +3,7 @@ import csv
 import os
 from visualisation import *
 from implementations import *
+from processing import *
 from matplotlib.ticker import AutoMinorLocator
 from definitions import ROOT_DIR
 #======= DATA CLEANING ==========
@@ -645,14 +646,38 @@ def clean_data_mapping():
     for i, key in enumerate(remaining_keys):
         data_mapping[key][1] = i
 
-def clean(data, nan_threshold, remove_const, const_thresholds, PCA, n_components, pca_threshold):
+def remove_correlated_columns(data, correlation_threshold):
+    """
+    Remove correlated columns from the input data while keeping at least one column from each correlated group.
+
+    Parameters:
+    - data (numpy.ndarray): Input data array.
+    - correlation_threshold (float): Threshold for correlation.
+
+    Returns:
+    - numpy.ndarray: Data with correlated columns removed.
+    """
+
+    correlation_matrix = np.corrcoef(data, rowvar=False)
+    mask = (np.abs(correlation_matrix) >= correlation_threshold) & (np.abs(correlation_matrix) < 1.0)
+
+    columns_to_drop = set()
+    
+    for col in range(mask.shape[0]):
+        correlated_columns = list(np.where(mask[col])[0])
+        if correlated_columns:
+            columns_to_drop.update(correlated_columns[1:])
+
+    data_filtered = np.delete(data, list(columns_to_drop), axis=1)
+    return data_filtered
+
+def clean(data, nan_threshold, remove_const, const_thresholds, PCA, n_components, pca_threshold, max_unique_values,correlation_threshold):
     #const thresholds = [categorical, constinuous]
     
     useful = remove_useless_features(data)
     
     categorical = get_type_features(useful, 'categorical')
     continuous = get_type_features(useful, 'continuous')
-    print(continuous.shape)
     
     clean_data_mapping() #sert à quoi<???
     filtered_continuous = remove_nan_columns(continuous, nan_threshold)
@@ -661,7 +686,6 @@ def clean(data, nan_threshold, remove_const, const_thresholds, PCA, n_components
     #uncorrelated_data = np.delete(nan_filtered, corr_keys, axis = 1)
 
     complete_continuous = complete(filtered_continuous)
-    print(complete_continuous.shape)
     
     if remove_const == True:
         categorical = remove_constant_categorical(filtered_categorical, const_thresholds[0])
@@ -672,9 +696,13 @@ def clean(data, nan_threshold, remove_const, const_thresholds, PCA, n_components
     if PCA :
         continuous_features = run_pca(continuous_features, n_components, pca_threshold)
         
-    class_filtered = filter_unique_values(categorical)
+    class_filtered = filter_unique_values(categorical, max_unique_values)
     encoded = BinaryOneHotEncoder(class_filtered)
-    clean_data = np.concatenate((continuous_features, encoded), axis=1)
+    
+    uncorrelated_encoded = remove_correlated_columns(encoded, correlation_threshold)
+    
+    clean_data = np.concatenate((continuous_features, uncorrelated_encoded), axis=1)
+    print(f'Finished cleaning - data is now {clean_data.shape}')
     return clean_data
     
 
