@@ -352,33 +352,38 @@ correlated_with = {
     "_PASTAE1": "_PAREC1",
     "_PA30021": "_PA300R2",
     "_TOTINDA": "EXERANY2",
-    "_RFDRHV5": "SEX, _DRNKWEK",
-    "_DRNKWEK": ("ALCDAY5", "AVEDRNK2", "DROCDY3_"),
-    "_RFBING5": ("ALCDAY", "DRNK3GE5"),
+    "_RFDRHV5": "SEX",
+    "_RFDRHV5": "_DRNKWEK",
+    "_DRNKWEK": "ALCDAY5", 
+    "_DRNKWEK": "AVEDRNK2", 
+    "_DRNKWEK": "DROCDY3_",
+    "_RFBING5": "ALCDAY", 
+    "_RFBING5": "DRNK3GE5",
     "DRNKANY5": "ALCDAY5",
     "_RFSMOK3": "_SMOKER3",
-    "_SMOKER3": ("SMOKE100", "SMOKEDAY"),
+    "_SMOKER3": "SMOKE100", 
     "_INCOMG": "INCOME2",
     "_EDUCAG": "EDUCA",
     "_CHLDCNT": "CHILDREN",
     "_RFBMI5": "_BMI5",
     "_BMI5CAT": "_BMI5",
     "HTIN4": "HEIGHT3",
-    "_AGE_G": "_IMPAGE",
-    "_AGE65YR": "AGE",
-    "_AGEG5YR": "AGE",
+    "_AGE65YR": "_AGE80",
+    "_AGEG5YR": "_AGE80",
     "_RACEGR3": "_RACE_G1",
     "_RACEG21": "_RACE",
-    "_RACE": ("_HISPANC", "_MRACE1"),
-    "_MRACE1": "MRACASC1",
-    "_PRACE1": "MRACASC1",
+    "_RACE": "_HISPANC", 
+    "_RACE": "_MRACE1",
     "_DRDXAR1": "HAVARTH3",
-    "_CASTHM1": ("ASTHMA3", "ASTHNOW"),
+    "_CASTHM1": "ASTHMA3", 
+    "_CASTHM1": "ASTHNOW",
     "_LTASTH1": "ASTHMA3",
-    "_RFCHOL": ("BLOODCHO", "TOLDHI2"),
-    "_CHOLCHK": ("BLOODCHO", "CHOLCHK"),
+    "_RFCHOL": "BLOODCHO",
+    "_RFCHOL": "TOLDHI2",
+    "_CHOLCHK": "BLOODCHO", 
     "_RFHYPE5": "BPHIGH4",
-    "_HCVU651": ("AGE", "HLTHPLN1"),
+    "_HCVU651": "AGE",
+    "_HCVU651": "HLTHPLN1",
     "_RFHLTH": "GENHLTH"
 }
 
@@ -552,23 +557,25 @@ def remove_constant_categorical(data, threshold=0.001):
     data_filtered = np.delete(data, constant_cols, axis=1)
     return data_filtered
     
-def delete_correlated_features(data):
-    key_to_delete = []
+def delete_correlated_features(data, threshold = 0.9):
+
+    keys_to_delete = []
 
     for key in correlated_with:
-        is_correlated = []
-        first_feature = data[:data_mapping[key][1]]
-        for _key in correlated_with[key]:
-            second_feature = data[:data_mapping[_key][1]]
-            correlation = np.corrcoef(first_feature, second_feature)
-            if correlation > 0.3 :
-                is_correlated.append(True)
-            else:
-                is_correlated.append(False)
-        if np.all(is_correlated):
-            key_to_delete = key  
 
-    return key_to_delete
+        first_feature = data[:,data_mapping[key][1]]
+        second_feature = data[:,data_mapping[correlated_with[key]][1]]
+
+        mask = ~np.isnan(first_feature) & ~np.isnan(second_feature)
+        first_feature_no_nan = first_feature[mask]
+        second_feature_no_nan = second_feature[mask]
+
+        correlation = np.corrcoef(first_feature_no_nan, second_feature_no_nan)
+
+        if correlation[0][1] > threshold :
+            keys_to_delete.append(key)
+
+    return keys_to_delete
 
 def filter_unique_values(data, max_unique_values=50):
     # Get the number of unique values in each column
