@@ -5,7 +5,6 @@ from visualisation import *
 from implementations import *
 
 
-
 def split_data(x, y, ratio, seed=1):
     """
     split the dataset based on the split ratio. If ratio is 0.8
