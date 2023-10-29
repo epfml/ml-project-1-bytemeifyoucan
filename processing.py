@@ -47,6 +47,46 @@ def load_csv_data(data_path, sub_sample=False):
 
     return x_train, x_test, y_train, train_ids, test_ids
 
+def split_data(x, y, ratio, seed=1):
+    """
+    split the dataset based on the split ratio. If ratio is 0.8
+    you will have 80% of your data set dedicated to training
+    and the rest dedicated to testing. If ratio times the number of samples is not round
+    you can use np.floor. Also check the documentation for np.random.permutation,
+    it could be useful.
+
+    Args:
+        x: numpy array of shape (N,), N is the number of samples.
+        y: numpy array of shape (N,).
+        ratio: scalar in [0,1]
+        seed: integer.
+
+    Returns:
+        x_tr: numpy array containing the train data.
+        x_te: numpy array containing the test data.
+        y_tr: numpy array containing the train labels.
+        y_te: numpy array containing the test labels.
+
+    >>> split_data(np.arange(13), np.arange(13), 0.8, 1)
+    (array([ 2,  3,  4, 10,  1,  6,  0,  7, 12,  9]), array([ 8, 11,  5]), array([ 2,  3,  4, 10,  1,  6,  0,  7, 12,  9]), array([ 8, 11,  5]))
+    """
+    # set seed
+    np.random.seed(seed)
+    limit = int(np.floor(ratio*y.size))
+    shuffled_indices = np.random.permutation(np.arange(y.size))
+
+    x_shuffled = x[shuffled_indices]
+    y_shuffled = y[shuffled_indices]
+    
+    x_tr = x_shuffled[:limit]
+    x_te = x_shuffled[limit:]
+    
+    y_tr = y_shuffled[:limit]
+    y_te = y_shuffled[limit:]
+    
+    
+    return x_tr, x_te, y_tr, y_te
+
 def build_k_indices(y, k_fold, seed=1):
     """build k indices for k-fold.
 
@@ -119,7 +159,8 @@ def cv_loss(model, y, x, k_indices, k, lambda_, initial_w, max_iters, gamma):
     loss_tr = np.sqrt(2*compute_mse(y_tr, x_tr, w))
     return loss_tr, loss_te
 
-def run_pca(x, n_components, fig_name = 'PCA_variance_ratios', visualisation = False):
+def run_pca(x, n_components, threshold, visualisation = False):
+    #if we want to work with threshold need to put n_components to False
     #use standardized data
     cov_mat = np.cov(x , rowvar = False)
     #Calculating Eigenvalues and Eigenvectors of the covariance matrix
@@ -127,15 +168,24 @@ def run_pca(x, n_components, fig_name = 'PCA_variance_ratios', visualisation = F
     #sort the eigenvalues in descending order
     sorted_index = np.argsort(eigen_values)[::-1]
     
-    sorted_eigenvalue = eigen_values[sorted_index]
+    sorted_eigenvalues = eigen_values[sorted_index]
     #similarly sort the eigenvectors 
     sorted_eigenvectors = eigen_vectors[:,sorted_index]
 
-    eigenvector_subset = sorted_eigenvectors[:,0:n_components]
+    if n_components == False:
+        #find limit tfor trheshold
+        eigenvalues_relative = sorted_eigenvalues/np.sum(sorted_eigenvalues) * 100
+        cum_eigenvalues = np.cumsum(eigenvalues_relative)
+        above_threshold = [(value, i) for i, value in enumerate(cum_eigenvalues) if threshold <= value]
+        perfect_components = min(above_threshold)[1]
+        print(f'Finished running PCA: keeping { perfect_components +1 } components to explain >{threshold}% variance')
+        eigenvector_subset = sorted_eigenvectors[:, 0:perfect_components]
+        plot_pca(x.shape[1], sorted_eigenvalues, visualisation, 'PCA_total_variance_decomposition')
+    else:
+        eigenvector_subset = sorted_eigenvectors[:,0:n_components]
+        plot_pca(x.shape[1], sorted_eigenvalues, visualisation, 'PCA_total_variance_decomposition')
+        
     x_reduced = np.dot(eigenvector_subset.transpose(),x.transpose()).transpose()
-    
-    plot_pca(n_components, sorted_eigenvalue, visualisation, fig_name)
-    
     return x_reduced
 
 def create_csv_submission(ids, y_pred, name):
