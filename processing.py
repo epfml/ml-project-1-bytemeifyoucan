@@ -159,7 +159,8 @@ def cv_loss(model, y, x, k_indices, k, lambda_, initial_w, max_iters, gamma):
     loss_tr = np.sqrt(2*compute_mse(y_tr, x_tr, w))
     return loss_tr, loss_te
 
-def run_pca(x, n_components, fig_name = 'PCA_variance_ratios', visualisation = False):
+def run_pca(x, n_components, threshold, visualisation = False):
+    #if we want to work with threshold need to put n_components to False
     #use standardized data
     cov_mat = np.cov(x , rowvar = False)
     #Calculating Eigenvalues and Eigenvectors of the covariance matrix
@@ -167,15 +168,24 @@ def run_pca(x, n_components, fig_name = 'PCA_variance_ratios', visualisation = F
     #sort the eigenvalues in descending order
     sorted_index = np.argsort(eigen_values)[::-1]
     
-    sorted_eigenvalue = eigen_values[sorted_index]
+    sorted_eigenvalues = eigen_values[sorted_index]
     #similarly sort the eigenvectors 
     sorted_eigenvectors = eigen_vectors[:,sorted_index]
 
-    eigenvector_subset = sorted_eigenvectors[:,0:n_components]
+    if n_components == False:
+        #find limit tfor trheshold
+        eigenvalues_relative = sorted_eigenvalues/np.sum(sorted_eigenvalues) * 100
+        cum_eigenvalues = np.cumsum(eigenvalues_relative)
+        above_threshold = [(value, i) for i, value in enumerate(cum_eigenvalues) if threshold <= value]
+        perfect_components = min(above_threshold)[1]
+    
+        eigenvector_subset = sorted_eigenvectors[:, 0:perfect_components]
+        plot_pca(x.shape[1], sorted_eigenvalues, visualisation, 'PCA_total_variance_decomposition')
+    else:
+        eigenvector_subset = sorted_eigenvectors[:,0:n_components]
+        
+    
     x_reduced = np.dot(eigenvector_subset.transpose(),x.transpose()).transpose()
-    
-    plot_pca(n_components, sorted_eigenvalue, visualisation, fig_name)
-    
     return x_reduced
 
 def create_csv_submission(ids, y_pred, name):

@@ -14,7 +14,7 @@
 - remove the 'delete' type features: remove_useless_features(data)
 - remove features with ratio of NaNs above threshold parameter: remove_nan_columns(data, threshold=0.8)???? checker le threshold par defaut
 - mean imputation on (continuous) data: complete(data)
-- plot_const_thresholds(data, cat_ratios, con_ratios, filename, visualisation = False) ????a completer
+- plot_const_thresholds(data, cat_ratios, con_ratios, filename, visualisation = False) ????a completer -> A METTRE DANS VISUALISATION
 - removing low-deviation continuous features with std < threshold_ratio * maximum std: remove_constant_continuous(data_array, threshold_ratio=0.001)??????? 
 - removing the features which have a high maximal frequency for a class: remove_constant_categorical(data, threshold=0.001)
 - ????YANN DECRIRE ????? delete_correlated_features(data)
