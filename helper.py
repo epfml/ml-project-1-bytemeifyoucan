@@ -174,7 +174,7 @@ def find_error(predictions, groundtruth): #to delete
     indices = np.where(predictions != groundtruth)[0]
     return indices
 
-def compute_losses_for_hyperparameters(model, y, tx, k_fold, w_initial=0, max_iters=0, lambdas = ['Nan'], gammas = ['Nan'], seed = 1):
+def compute_losses_for_hyperparameters(model, y, tx, k_fold, max_iters=0, lambdas = ['Nan'], gammas = ['Nan'], seed = 1):
     """Process cross-validation with the chosen model 
         Calculate the test and train errors for every hyperparameters 
 
@@ -202,7 +202,7 @@ def compute_losses_for_hyperparameters(model, y, tx, k_fold, w_initial=0, max_it
             losses_tr = []
             losses_te = []
             for k in range(k_fold): 
-                loss_tr, loss_te = cv_loss(model, y, tx, k_indices, k, lambda_, w_initial, max_iters, gamma)
+                loss_tr, loss_te = cv_loss(model, y, tx, k_indices, k, lambda_, max_iters, gamma)
                 losses_tr.append(loss_tr)
                 losses_te.append(loss_te)
             loss_tr = np.mean(losses_tr)
