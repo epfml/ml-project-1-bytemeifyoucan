@@ -56,7 +56,7 @@
 - calculate_list_of_metrics(y_true, y_pred):- ????a completer
 
 
-#### `scripts/preprocessing.py`:
+#### `scripts/processing.py`:
 - loading the csv data into an array: load_csv_data(data_path, sub_sample=False)
 - split training data into train and test sets: split_data(x, y, ratio, seed=1)
 - split data for k-folds cross validation: build_k_indices(y, k_fold, seed=1)
