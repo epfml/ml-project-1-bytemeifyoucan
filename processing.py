@@ -2,8 +2,8 @@ import numpy as np
 import csv
 import os
 from visualisation import *
-from implementations import *
-
+import helper as hp
+import implementations as imp
 
 def split_data(x, y, ratio, seed=1):
     """
@@ -99,23 +99,23 @@ def cv_loss(model, y, x, k_indices, k, lambda_, max_iters, gamma):
 
     initial_w = np.zeros(len(y_tr))
     if model == 'gradient descent':
-        w, _ = mean_squared_error_gd(y_tr,x_tr, initial_w, max_iters, gamma)
+        w, _ = imp.mean_squared_error_gd(y_tr,x_tr, initial_w, max_iters, gamma)
         
     elif model == 'stochastic gradient descent':
-        w, _ = mean_squared_error_sgd(y_tr, x_tr, initial_w, max_iters, gamma)
+        w, _ = imp.mean_squared_error_sgd(y_tr, x_tr, initial_w, max_iters, gamma)
         
     elif model == 'ridge regression':
-        w, _ = ridge_regression(y_tr, x_tr, lambda_)
+        w, _ = imp.ridge_regression(y_tr, x_tr, lambda_)
         
     elif model == 'logistic regression':
-        w, _ = logistic_regression(y_tr, x_tr, initial_w, max_iters, gamma)
+        w, _ = imp.logistic_regression(y_tr, x_tr, initial_w, max_iters, gamma)
         
     elif model == 'reg logistic regression':
-        w, _ = reg_logistic_regression(y_tr, x_tr, lambda_, initial_w, max_iters, gamma)
+        w, _ = imp.reg_logistic_regression(y_tr, x_tr, lambda_, initial_w, max_iters, gamma)
     
     # calculate the loss for train and test data: TODO
-    loss_te = np.sqrt(2*compute_mse(y_te, x_te, w))
-    loss_tr = np.sqrt(2*compute_mse(y_tr, x_tr, w))
+    loss_te = np.sqrt(2*hp.compute_mse(y_te, x_te, w))
+    loss_tr = np.sqrt(2*hp.compute_mse(y_tr, x_tr, w))
     return loss_tr, loss_te
 
 def run_pca(x, n_components, threshold, visualisation = False):

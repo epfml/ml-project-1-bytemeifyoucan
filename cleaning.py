@@ -6,6 +6,7 @@ from implementations import *
 from processing import *
 from matplotlib.ticker import AutoMinorLocator
 from definitions import ROOT_DIR
+
 #======= DATA CLEANING ==========
 #get dictionnary with names DONE
 #remove the useless defined by yann OK
@@ -388,7 +389,6 @@ correlated_with = {
     "_RFHLTH": "GENHLTH"
 }
 
-
 def get_type_features(data, type_):
     """
     This function returns the data with the selected features type 
@@ -558,8 +558,8 @@ def remove_constant_categorical(data, threshold=0.001):
     data_filtered = np.delete(data, constant_cols, axis=1)
     return data_filtered
     
-def keys_correlated_features(data):
-    key_to_delete = []
+def keys_correlated_features(data, threshold = 0.9):
+    keys_to_delete = []
 
     for key in correlated_with:
 
