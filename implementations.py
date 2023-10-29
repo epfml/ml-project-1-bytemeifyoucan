@@ -47,9 +47,7 @@ def mean_squared_error_sgd(y, tx, initial_w, max_iters, gamma):
         w = new_w # update w_{t} with the value of w_{t+1} for the next iteration
     e = y - tx.dot(w)
     return w, compute_mse(e)
-    
-
-    
+      
 def least_squares(y, tx):
     """Computes optimal weights by solving the normal equation
 
@@ -66,7 +64,6 @@ def least_squares(y, tx):
     #return w, compute_mse(y, tx, w)
     e = y - tx.dot(w)
     return w, compute_mse(e)
-
 
 def ridge_regression(y, tx, lambda_, cost = 'mse'):
     """Implements ridge regression with L2 regularisation to optimize weights by solving normal equation. 
@@ -97,7 +94,6 @@ def ridge_regression(y, tx, lambda_, cost = 'mse'):
         loss = compute_mae(e)
     return w, loss
     
-
 def logistic_regression(y, tx, initial_w, max_iters, gamma):
     """Will perform logistic regression on tx and y, bu computing gradient and updating w max_iter times.
 
@@ -126,7 +122,6 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma):
 
     return w, loss
 
-    
 def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
     """_summary_
 
