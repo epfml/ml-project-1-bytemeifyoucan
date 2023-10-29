@@ -68,7 +68,7 @@ def build_k_indices(y, k_fold, seed=1):
     k_indices = [indices[k * interval : (k + 1) * interval] for k in range(k_fold)]
     return np.array(k_indices)
 
-def cv_loss(model, y, x, k_indices, k, lambda_, initial_w, max_iters, gamma): 
+def cv_loss(model, y, x, k_indices, k, lambda_, max_iters, gamma): 
     """to complete ????
 
     Args:
@@ -98,6 +98,7 @@ def cv_loss(model, y, x, k_indices, k, lambda_, initial_w, max_iters, gamma):
     y_tr = np.array([y[i] for i in train.flatten()])
     x_tr = np.array([x[i] for i in train.flatten()])
 
+    initial_w = np.zeros(len(y_tr))
     if model == 'gradient descent':
         w, _ = mean_squared_error_gd(y_tr,x_tr, initial_w, max_iters, gamma)
         
