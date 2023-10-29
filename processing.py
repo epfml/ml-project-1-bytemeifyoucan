@@ -178,13 +178,13 @@ def run_pca(x, n_components, threshold, visualisation = False):
         cum_eigenvalues = np.cumsum(eigenvalues_relative)
         above_threshold = [(value, i) for i, value in enumerate(cum_eigenvalues) if threshold <= value]
         perfect_components = min(above_threshold)[1]
-    
+        print(f'Finished running PCA: keeping { perfect_components +1 } components to explain >{threshold}% variance')
         eigenvector_subset = sorted_eigenvectors[:, 0:perfect_components]
         plot_pca(x.shape[1], sorted_eigenvalues, visualisation, 'PCA_total_variance_decomposition')
     else:
         eigenvector_subset = sorted_eigenvectors[:,0:n_components]
+        plot_pca(x.shape[1], sorted_eigenvalues, visualisation, 'PCA_total_variance_decomposition')
         
-    
     x_reduced = np.dot(eigenvector_subset.transpose(),x.transpose()).transpose()
     return x_reduced
 

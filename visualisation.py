@@ -29,7 +29,6 @@ def cross_validation_visualization(lambds, rmse_tr, rmse_te, visualisation, fig_
 def plot_pca(n_components, eigenvalues, visualisation, fig_name):
     eigenvalues_relative = eigenvalues/np.sum(eigenvalues) * 100
     cum_eigenvalues = np.cumsum(eigenvalues_relative[: n_components])
-    print(cum_eigenvalues)
     plt.plot(range(n_components), cum_eigenvalues, color = 'blue', marker = 'x')
     plt.ylabel("Variance explained (%)")
     plt.xlabel("Principal Component")

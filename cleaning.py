@@ -395,7 +395,7 @@ def get_type_features(data, type_):
         continuous_data or categorical_data (np.array): new data containing only the old data with the correct type
     """
 
-    if type_  != 'continuous' or type_ != 'categorical':
+    if type_  != 'continuous' and type_ != 'categorical':
         raise TypeError(f"Type of data must be either categorical or continuous, you wrote {type_}")
     
     indices = [data_mapping[key][1] for key in data_mapping if data_mapping[key][0] == type_]
@@ -639,93 +639,37 @@ def clean_data_mapping():
     for i, key in enumerate(remaining_keys):
         data_mapping[key][1] = i
 
-
+def clean(data, nan_threshold, remove_const, const_thresholds, PCA, n_components, pca_threshold):
+    #const thresholds = [categorical, constinuous]
     
-def clean_VIVA(data, train = True):
+    useful = remove_useless_features(data)
     
-    clean_data = data.copy()
+    categorical = get_type_features(useful, 'categorical')
+    continuous = get_type_features(useful, 'continuous')
+    print(continuous.shape)
+    
+    clean_data_mapping() #sert à quoi<???
+    filtered_continuous = remove_nan_columns(continuous, nan_threshold)
+    filtered_categorical = remove_nan_columns(categorical, nan_threshold)
+    #corr_keys = keys_correlated_features(nan_filtered)
+    #uncorrelated_data = np.delete(nan_filtered, corr_keys, axis = 1)
 
-    if train:
-       split_ratio = 0.8
-       x_tr, x_te, y_tr, y_te = split_data(x, y, split_ratio) # issue
-       clean_data = x_tr
-
-    clean_data = remove_useless_features(clean_data)
-    clean_data_mapping()
-
-    clean_data = remove_nan_columns(clean_data)
-
-    for key, value in data_mapping.items():
-        if value[0] == 'continuous':
-            col_to_change = clean_data[:,value[1]]
-            update_col = complete(col_to_change)
-            update_col = standardize(update_col)
-            clean_data[:,value[1]] = update_col
-
-    keys_to_delete = delete_correlated_features(data)
-    # Step 2: Remove keys with 'delete' type
-    for key in keys_to_delete:
-        del data_mapping[key]
-    # Step 3: Adjust indexes for remaining features
-    remaining_keys = list(data_mapping.keys())
-    for i, key in enumerate(remaining_keys):
-        data_mapping[key][1] = i
-
-    categorical_data_encoded = []
-    for key, value in data_mapping.items():
-        if value[0] == 'categorical':
-            col = clean_data[:,value[1]]
-            new_cols = perform_one_hot_encoding(col)
-            categorical_data_encoded = np.append(categorical_data_encoded, new_cols, axis=1)
-
-    ### VARIANCE : CONST FEATURE ???
-
-    continuous_data = get_type_features(clean_data, 'continuous')
-    clean_data = np.concatenate(continuous_data, categorical_data_encoded, axis=1)
-
+    complete_continuous = complete(filtered_continuous)
+    print(complete_continuous.shape)
+    
+    if remove_const == True:
+        categorical = remove_constant_categorical(filtered_categorical, const_thresholds[0])
+        complete_continuous = remove_constant_continuous(complete_continuous, const_thresholds[1])
+        
+    continuous_features = standardize(complete_continuous)
+    
+    if PCA :
+        continuous_features = run_pca(continuous_features, n_components, pca_threshold)
+        
+    class_filtered = filter_unique_values(categorical)
+    encoded = BinaryOneHotEncoder(class_filtered)
+    clean_data = np.concatenate((continuous_features, encoded), axis=1)
     return clean_data
-
-def clean_YANN(data, train = True):
     
-    clean_data = data.copy()
 
-    if train:
-       split_ratio = 0.8
-       x_tr, x_te, y_tr, y_te = split_data(x, y, split_ratio) # issue
-       clean_data = x_tr
-
-    clean_data = remove_useless_features(clean_data)
-    clean_data_mapping()
-
-    clean_data = remove_nan_columns(clean_data)
-
-    for key, value in data_mapping.items():
-        if value[0] == 'continuous':
-            col_to_change = clean_data[:,value[1]]
-            update_col = complete(col_to_change)
-            update_col = standardize(update_col)
-            clean_data[:,value[1]] = update_col
-
-    keys_to_delete = delete_correlated_features(data)
-    # Step 2: Remove keys with 'delete' type
-    for key in keys_to_delete:
-        del data_mapping[key]
-    # Step 3: Adjust indexes for remaining features
-    remaining_keys = list(data_mapping.keys())
-    for i, key in enumerate(remaining_keys):
-        data_mapping[key][1] = i
-
-    categorical_data_encoded = []
-    for key, value in data_mapping.items():
-        if value[0] == 'categorical':
-            col = clean_data[:,value[1]]
-            new_cols = perform_one_hot_encoding(col)
-            categorical_data_encoded = np.append(categorical_data_encoded, new_cols, axis=1)
-
-    ### VARIANCE : CONST FEATURE ???
-
-    continuous_data = get_type_features(clean_data, 'continuous')
-    clean_data = np.concatenate(continuous_data, categorical_data_encoded, axis=1)
-
-    return clean_data
-
+        
