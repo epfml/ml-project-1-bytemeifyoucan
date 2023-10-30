@@ -71,6 +71,7 @@ Runing this file will create our submission csv (not on AIcrowd because failed t
 
 
 #### `visualisation.py`:
+Functions that can be used to obtain figures in the report
 - plotting pca results: plot_pca(n_components, eigenvalues, visualisation, fig_name)
 - plotting test vs train error when runing cross validation: plot_train_test(model, train_errors, test_errors, lambdas, gammas=0, visualisation = False)
 - plotting metrics for a given model: plot_metrics(model, metrics, thresholds, visualisation = False)
