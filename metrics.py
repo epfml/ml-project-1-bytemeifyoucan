@@ -41,7 +41,7 @@ def calculate_f1_score(y_true, y_pred):
     
     # Binary classification: assume 1 positive class and 0 negative class
     precision = calcuate_precision(y_true, y_pred)
-    recall = caclculate_sensitivity(y_true, y_pred)
+    recall = calculate_sensitivity(y_true, y_pred)
         
     # Calculate F1 score
     f1_score = 2 * (precision * recall) / (precision + recall)
@@ -66,7 +66,7 @@ def calcuate_precision(y_true, y_pred):
 
     conf_matrix = confusion_matrix(y_true, y_pred)
     TP = conf_matrix[1, 1]
-    FN = conf_matrix[1, 0]
+    FP = conf_matrix[0, 1]
 
     precision = TP / (TP + FP)
 

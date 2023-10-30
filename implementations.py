@@ -1,4 +1,4 @@
-from helper import *
+import helper as hp
 import numpy as np
 
 def mean_squared_error_gd(y, tx, initial_w, max_iters, gamma):
@@ -25,7 +25,7 @@ def mean_squared_error_gd(y, tx, initial_w, max_iters, gamma):
         new_w = w - gamma * gradient # w_{t+1} = w_{t} - gamma * \/L(w_{t})
         w = new_w # update w_{t} with the value of w_{t+1} for the next iteration
     e = y - np.dot(tx,w)
-    return w, compute_mse(e)
+    return w, hp.compute_mse(e)
 
 def mean_squared_error_sgd(y, tx, initial_w, max_iters, gamma):  
     """Calculates the gradient of the unregularized loss and uses it in stochastic gradient descent to approximate optimal weights
@@ -43,10 +43,10 @@ def mean_squared_error_sgd(y, tx, initial_w, max_iters, gamma):
     """
     w = initial_w # initiate w_{t}
     for n_iter in range(max_iters):
-        new_w = w - gamma * compute_stoch_gradient(y, tx, w) # w_{t+1} = w_{t} - gamma * \/L_n(w_{t})
+        new_w = w - gamma * hp.compute_stoch_gradient(y, tx, w) # w_{t+1} = w_{t} - gamma * \/L_n(w_{t})
         w = new_w # update w_{t} with the value of w_{t+1} for the next iteration
     e = y - tx.dot(w)
-    return w, compute_mse(e)
+    return w, hp.compute_mse(e)
       
 def least_squares(y, tx):
     """Computes optimal weights by solving the normal equation
@@ -63,7 +63,7 @@ def least_squares(y, tx):
     w = np.linalg.solve(txT.dot(tx),txT.dot(y))
     #return w, compute_mse(y, tx, w)
     e = y - tx.dot(w)
-    return w, compute_mse(e)
+    return w, hp.compute_mse(e)
 
 def ridge_regression(y, tx, lambda_, cost = 'mse'):
     """Implements ridge regression with L2 regularisation to optimize weights by solving normal equation. 
@@ -89,9 +89,9 @@ def ridge_regression(y, tx, lambda_, cost = 'mse'):
     w = np.linalg.solve(np.dot(txT, tx) + 2*N*lambda_ * np.identity(D) , np.dot(txT, y))
     e = y - tx.dot(w)
     if cost == 'mse':
-        loss = compute_mse(e)
+        loss = hp.compute_mse(e)
     else:
-        loss = compute_mae(e)
+        loss = hp.compute_mae(e)
     return w, loss
     
 def logistic_regression(y, tx, initial_w, max_iters, gamma):
@@ -112,12 +112,12 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma):
     w = initial_w
 
     for n_iter in range(max_iters):
-        s = sigmoid(tx.dot(w))
+        s = hp.sigmoid(tx.dot(w))
         gradient = - (tx.T).dot(y - s) / len(y)
         new_w = w - gamma * gradient # w_{t+1} = w_{t} - gamma * \/L_n(w_{t})
         w = new_w # update w_{t} with the value of w_{t+1} for the next iteration
 
-    s = sigmoid(tx.dot(w))
+    s = hp.sigmoid(tx.dot(w))
     loss = - np.mean(y * np.log(s) + (1 - y) * np.log(1 - s))
 
     return w, loss
@@ -142,12 +142,12 @@ def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
     w = initial_w
 
     for n_iter in range(max_iters):
-        s = sigmoid(tx.dot(w))
+        s = hp.sigmoid(tx.dot(w))
         gradient = - (tx.T).dot(y - s) / len(y) +  2 * lambda_ * np.abs(w)
         new_w = w - gamma * gradient # w_{t+1} = w_{t} - gamma * \/L_n(w_{t})
         w = new_w # update w_{t} with the value of w_{t+1} for the next iteration
 
-    s = sigmoid(tx.dot(w))
+    s = hp.sigmoid(tx.dot(w))
     loss = - np.mean(y * np.log(s) + (1 - y) * np.log(1 - s))
 
     return w, loss

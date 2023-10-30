@@ -7,17 +7,6 @@ from processing import *
 from matplotlib.ticker import AutoMinorLocator
 from definitions import ROOT_DIR
 
-#======= DATA CLEANING ==========
-#get dictionnary with names DONE
-#remove the useless defined by yann OK
-#remove nan columns OK
-#remove constant columns DONE
-#remove correlated columns OK
-#for categorical values do one hot encoding -----CHECK YANN
-#for continuous values add mean DONE
-#standardize OK
-#clean function DONE
-
 # The following dictionary maps the feature name to its type and its index in the raw data
 
 data_mapping = {
@@ -658,5 +647,10 @@ def clean(data, nan_threshold, remove_const, const_thresholds, PCA, n_components
     print(f'Finished cleaning - data is now {clean_data.shape}')
     return clean_data
     
-
+def clean_continuous(data, nan_threshold, n_components, pca_threshold, correlation_threshold):
+    continuous = get_type_features(data, 'continuous')
+    continuous = complete(continuous)
+    continuous = standardize(continuous)
+    continuous = run_pca(continuous, n_components, pca_threshold)
+    return continuous
         
