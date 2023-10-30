@@ -3,75 +3,72 @@
 
 ### Code structure
 
-#### `scripts/basics.py`:
-
-- train model : train(model, y, x, initial_w = 0, max_iters = 0, gamma = 0, lambda_ = 0, cost = 'mse')              
-- evaluate accuracy + f1 score: ???? jsp à quel point on le veut ou on garde metrics?
-
 #### `scripts/cleaning.py`:
-- data mapping dictionnary as {'feature_ID' : [type, index]} with type in ['continuous', 'categorical', 'delete'] which were estimated from hand annotation of the dataset, 'delete' corresponding to unusable data (????? à preciser)
+- data mapping dictionnary as {'feature_ID' : [type, index]} with type in ['continuous', 'categorical', 'delete'] which were estimated from hand annotation of the dataset, 'delete' corresponding to unusable data
+- correlated_with dictionnary, containing feature ID for correlated features
 - obtain 'categorical' or 'continuous' data: get_type_features(data, type_)
 - remove the 'delete' type features: remove_useless_features(data)
-- remove features with ratio of NaNs above threshold parameter: remove_nan_columns(data, threshold=0.8)???? checker le threshold par defaut
+- remove features with ratio of NaNs above threshold parameter: remove_nan_columns(data, threshold=0.8)
 - mean imputation on (continuous) data: complete(data)
-- plot_const_thresholds(data, cat_ratios, con_ratios, filename, visualisation = False) ????a completer -> A METTRE DANS VISUALISATION
-- removing low-deviation continuous features with std < threshold_ratio * maximum std: remove_constant_continuous(data_array, threshold_ratio=0.001)??????? 
+- removing low-deviation continuous features with std < threshold_ratio * maximum std: remove_constant_continuous(data_array, threshold_ratio=0.001)
 - removing the features which have a high maximal frequency for a class: remove_constant_categorical(data, threshold=0.001)
-- ????YANN DECRIRE ????? delete_correlated_features(data)
-- BinaryOneHotEncoder(data)  ????a completer
+- remove correlated features in correlated_with dictionnary: delete_correlated_features(data)
+- OneHotEncode data: OneHotEncoder(data) 
 - standardizing (continuous) data: standardize(data)
-- ????YANN DECRIRE ????? clean_data_mapping()
-- ????? dire pour le dictionnaire sans les delete pour les indexes
-
-- applying preprocessing steps to data: ???? clean data function
+- updating data_mapping dictionnary indexes after removing 'delete' features: clean_data_mapping()
+- delete correlated columns calculating correlation matrix: remove_correlated_columns(data, correlation_threshold)
+- applying preprocessing steps to data: clean(data, nan_threshold, remove_const, const_thresholds, PCA, n_components, pca_threshold, max_unique_values,correlation_threshold)
 
 
 #### `scripts/helper.py`:
-- compute mse                       ????a completer
-- compute mae                       ????a completer
-- compute gradient                  ????a completer
-- batch-iter                        ????a completer
-- compute stoch gradient            ????a completer
-- load csv des exos (to move)       ????a completer
-- create csv submissions (to move)  ????a completer
-- cross validation (in progress)    ????a completer
-- find error points indices     DONE   ????? jsp à quel point utile
+- load dataset: load_csv_data(data_path, sub_sample=False)
+- create submission file: create_csv_submission(ids, y_pred, name)
+- compute mse:compute_mse(e)
+- compute mae:compute_mae(e)
+- compute gradient:compute_gradient(y, tx, w)
+- Generate a minibatch iterator for a dataset: batch_iter(y, tx, batch_size, num_batches=1, shuffle=True)
+- compute stochastic gradient: compute_stoch_gradient(y, tx, w)
+- sigmoid function: sigmoid(t)
+- obtain for a model, a choice of lambdas and gamma, the test and train losses: compute_losses_for_hyperparameters(model, y, tx, k_fold, max_iters=0, lambdas = ['Nan'], gammas = ['Nan'], seed = 1)
+- obtain best hyperparameters based on test loss: find_best_hyperparameters(hyperparameter_losses)
+- train model : train(model, y, x, initial_w = 0, max_iters = 0, gamma = 0, lambda_ = 0, cost = 'mse')  
 
 
 #### `scripts/implementation.py`:
-- mean_squared_error_gd     ????a completer
-- mean_squared_error_sgd        ????a completer
-- least_squares     ????a completer
-- ridge_regression      ????a completer
-- logistic_regression           check for loss -1,1/0,1???      ????a completer
-- reg_logistic_regression       check for loss -1,1/0,1????     ????a completer
+It contains the 6 functions in project1 description
+- linear regression using gradient descent: mean_squared_error_gd(y, tx, initial_w, max_iters, gamma)
+- linear regression using stochastic gradient descent: mean_squared_error_sgd(y, tx, initial_w, max_iters, gamma)
+- least squares regression using normal equations: least_squares(y, tx)
+- ridge regression using normal equations: ridge_regression(y, tx, lambda_, cost = 'mse')
+- logistic regression using gradient descent or SGD: logistic_regression(y, tx, initial_w, max_iters, gamma)
+- regularized logistic regression using gradient descent or SGD: reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma)
+
 
 #### `scripts/metrics.py`:
-- confusion_matrix(y_true, y_pred)  - ???? maybe useless
-- calculate_f1_score(y_true, y_pred) - ????a completer
-- calcuate_precision(y_true, y_pred) - ????a completer
-- calculate_specificity(y_true, y_pred)- ????a completer
-- caclculate_sensitivity(y_true, y_pred)- ????a completer
-- calculate_accuracy(y_true, y_pred)- ????a completer
-- calculate_list_of_metrics(y_true, y_pred):- ????a completer
+- obtain confusion matrice: confusion_matrix(y_true, y_pred)  
+- compute F1 score: calculate_f1_score(y_true, y_pred) 
+- compute precision: calcuate_precision(y_true, y_pred) 
+- compute specificity: calculate_specificity(y_true, y_pred)
+- compute sensitivity: calculate_sensitivity(y_true, y_pred)
+- compute accuracy: calculate_accuracy(y_true, y_pred)
+- compute all of the metrics above: calculate_list_of_metrics(y_true, y_pred)
 
 
 #### `scripts/processing.py`:
-- loading the csv data into an array: load_csv_data(data_path, sub_sample=False)
 - split training data into train and test sets: split_data(x, y, ratio, seed=1)
 - split data for k-folds cross validation: build_k_indices(y, k_fold, seed=1)
+- obtain loss for a given index k for k-fold cross validation: cv_loss(model, y, x, k_indices, k, lambda_, max_iters, gamma)
 - PCA decomposition: run_pca(x, n_components, fig_name = 'PCA_variance_ratios', visualisation = False)
-- create submission file from prediction array: create_csv_submission(ids, y_pred, name)
+
 
 #### `scripts/run.py`:
-can run and will give all submission files we submit and talk about + the confusion matrices + our plots in a plots folder
-- ????a completer
+Runing this file will create our submission csv (not on AIcrowd because failed to submit)
+
 
 #### `scipts/visualisation.py`:
-- plotting confusion matrices/f1/accuracy?  - ????a completer
-- plotting pca results          DONE        - ????a completer
-- plotting data with color code true false etc  - ????a completer
-- plotting cross validation results figure with different losses - ????a completer
+- plotting pca results: plot_pca(n_components, eigenvalues, visualisation, fig_name)
+- plotting test vs train error when runing cross validation: plot_train_test(model, train_errors, test_errors, lambdas, gammas=0, visualisation = False)
+- plotting metrics for a given model: plot_metrics(model, metrics, thresholds, visualisation = False)
 
 
 

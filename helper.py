@@ -135,45 +135,6 @@ def sigmoid(t):
             
     return 1.0 / (1.0 + np.exp(-t))
 
-def cross_validation(model, y, x, k_fold, lambdas, initial_w = 0, max_iters = 0, gamma = 0, seed = 1, visualisation = False): #to delete?
-    """WORK IN PROGRESS?????
-
-    Args:
-        degree: integer, degree of the polynomial expansion
-        k_fold: integer, the number of folds
-        lambdas: shape = (p, ) where p is the number of values of lambda to test
-    Returns:
-        best_lambda : scalar, value of the best lambda
-        best_rmse : scalar, the associated root mean squared error for the best lambda
-    """
-
-    # split data in k fold
-    k_indices = build_k_indices(y, k_fold, seed)
-    # define lists to store the loss of training data and test data
-    rmse_tr = []
-    rmse_te = []
-
-    for lambda_ in lambdas:
-        avg_tr = []
-        avg_te = []
-        for k in range(k_fold):
-            tr_err, te_err = cv_loss(model, y, x, k_indices, k, lambda_, initial_w , max_iters, gamma)
-            avg_tr.append(tr_err)
-            avg_te.append(te_err)
-        rmse_tr.append(np.mean(avg_tr))
-        rmse_te.append(np.mean(avg_te))
-    
-    best_rmse = min(rmse_te)
-    best_lambda = lambdas[rmse_te.index(best_rmse)]
-        
-    cross_validation_visualization(lambdas, rmse_tr, rmse_te, visualisation)
-    return best_lambda, best_rmse
-
-
-def find_error(predictions, groundtruth): #to delete 
-    indices = np.where(predictions != groundtruth)[0]
-    return indices
-
 def compute_losses_for_hyperparameters(model, y, tx, k_fold, max_iters=0, lambdas = ['Nan'], gammas = ['Nan'], seed = 1):
     """Process cross-validation with the chosen model 
         Calculate the test and train errors for every hyperparameters 

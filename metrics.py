@@ -68,7 +68,7 @@ def calcuate_precision(y_true, y_pred):
     TP = conf_matrix[1, 1]
     FN = conf_matrix[1, 0]
 
-    precision = TP / (TP + FN)
+    precision = TP / (TP + FP)
 
     return precision
 
@@ -98,7 +98,7 @@ def calculate_specificity(y_true, y_pred):
     return specificity
     
 
-def caclculate_sensitivity(y_true, y_pred):
+def calculate_sensitivity(y_true, y_pred):
     """Calculates the sensitivity/recall of the model
        Recall measures the proportion of true positive predictions out of all actual positive instances. 
 
@@ -164,11 +164,11 @@ def calculate_metrics(y_true, y_pred):
     metrics = [calculate_accuracy(y_true, y_pred), 
                calculate_f1_score(y_true, y_pred),
                calculate_specificity(y_true, y_pred),
-               caclculate_sensitivity(y_true, y_pred),
+               calculate_sensitivity(y_true, y_pred),
                calcuate_precision(y_true, y_pred)]
     return metrics
 
 def prettyprint(metrics):
     print(f'Accuracy: {metrics[0]} - F1 score {metrics[1]}')
-    print(f'Scpecificity: {metrics[2]} - Sensitivity: {metrics[3]}')
+    print(f'Specificity: {metrics[2]} - Sensitivity: {metrics[3]}')
     print(f'Precision: {metrics[4]}')

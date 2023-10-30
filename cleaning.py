@@ -477,52 +477,6 @@ def complete(data):
     completed_data[nan_mask] = np.take(column_means, np.where(nan_mask)[1])
     return completed_data
 
-def plot_const_thresholds(data, cat_ratios, con_ratios, filename, visualisation = False):
-    #plot how many we are keeping if we remove based on threshold for cat and num
-    continuous = get_type_features(data, 'continuous')
-    complete_continuous = complete(continuous) #choix à justifier ???
-    categorical = get_type_features(data, 'categorical')
-    
-    con_left = []
-    cat_left = []
-    for i in cat_ratios:
-        cat_left.append(np.shape(remove_constant_categorical(categorical, i))[1])
-        
-    for i in con_ratios:
-        con_left.append(np.shape(remove_constant_categorical(complete_continuous, i))[1])
-    
-    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(8, 6))
-    plt.suptitle('Remaining features when removing predictors containing values with freq > 1-ratio with various ratios')
-    ax1.plot(con_ratios, con_left, color='royalblue')
-    ax1.set_xlabel('Ratio')
-    ax1.set_ylabel('Continuous features left', color='royalblue')
-
-    ax2.plot(cat_ratios, cat_left, color='deeppink')
-    ax2.set_ylabel('Categorical features left', color='deeppink')
-    ax2.set_xlabel('Ratio')
-    
-    
-    
-    # Add minor ticks on the y-axis
-    ax1.xaxis.set_minor_locator(AutoMinorLocator(n=5))  
-    ax2.xaxis.set_minor_locator(AutoMinorLocator(n=5))
-    ax1.yaxis.set_minor_locator(AutoMinorLocator(n=5))   
-    ax2.yaxis.set_minor_locator(AutoMinorLocator(n=5)) 
-
-    # Add grid spanning both x and y ticks
-    ax1.grid(True, linestyle='--', which='both', linewidth=0.5)  
-    ax2.grid(True, linestyle='--', which='both', linewidth=0.5)  
-
-    #plt.grid(True)
-    plt.tight_layout()
-    
-    if visualisation == False:
-        plt.close()
-    fig_path = os.path.join(ROOT_DIR, 'figures')
-    if not os.path.exists(fig_path):
-        os.makedirs(fig_path)
-    plt.savefig(os.path.join(fig_path, filename))
-    
 def remove_constant_continuous(data_array, threshold_ratio=0.001):
     """
     Remove constant features from the data array based on a threshold ratio.
@@ -589,7 +543,7 @@ def filter_unique_values(data, max_unique_values=50):
     
     return filtered_array
 
-def BinaryOneHotEncoder(data):
+def OneHotEncoder(data):
     num_samples, num_features = data.shape
 
     binary_encodings = []
@@ -675,11 +629,10 @@ def clean(data, nan_threshold, remove_const, const_thresholds, PCA, n_components
     #const thresholds = [categorical, constinuous]
     
     useful = remove_useless_features(data)
-    
+    clean_data_mapping()
     categorical = get_type_features(useful, 'categorical')
     continuous = get_type_features(useful, 'continuous')
     
-    clean_data_mapping() #sert à quoi<???
     filtered_continuous = remove_nan_columns(continuous, nan_threshold)
     filtered_categorical = remove_nan_columns(categorical, nan_threshold)
     #corr_keys = keys_correlated_features(nan_filtered)
@@ -697,7 +650,7 @@ def clean(data, nan_threshold, remove_const, const_thresholds, PCA, n_components
         continuous_features = run_pca(continuous_features, n_components, pca_threshold)
         
     class_filtered = filter_unique_values(categorical, max_unique_values)
-    encoded = BinaryOneHotEncoder(class_filtered)
+    encoded = OneHotEncoder(class_filtered)
     
     uncorrelated_encoded = remove_correlated_columns(encoded, correlation_threshold)
     

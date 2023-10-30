@@ -68,8 +68,7 @@ def build_k_indices(y, k_fold, seed=1):
     return np.array(k_indices)
 
 def cv_loss(model, y, x, k_indices, k, lambda_, max_iters, gamma): 
-    """to complete ????
-
+    """
     Args:
         model:      str, ['gradient descent', 'stochastic gradient descent', 'ridge regression', 'logistic regression', 'reg logistic regression]
         y:          shape=(N,)
